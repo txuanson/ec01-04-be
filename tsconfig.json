@@ -9,10 +9,23 @@
     "target": "es2017",
     "sourceMap": true,
     "outDir": "./dist",
-    "baseUrl": "./",
+    "baseUrl": ".",
+    "paths": {
+      "@/auth/*": [
+        "src/auth/*"
+      ],
+      "@/user/*": [
+        "src/user/*"
+      ],
+      "@/utils/*": [
+        "src/utils/*"
+      ],
+    },
     "incremental": true,
     "skipLibCheck": true,
     "strictNullChecks": false,
+    "strict": false,
+    "esModuleInterop": true,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
