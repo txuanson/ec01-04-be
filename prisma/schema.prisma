@@ -1,0 +1,229 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Admin {
+  mUsername   String    @map("m_username")
+  mPassword   String    @map("m_password")
+  mEmail      String    @map("m_email")
+  mRole       String?   @map("m_role") @db.VarChar(32)
+  mLastLogin  DateTime? @default(now()) @map("m_last_login") @db.Timestamp(6)
+  mCreatedAt  DateTime? @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt DateTime? @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mId         Int       @id(map: "admin_pk") @default(autoincrement()) @map("m_id")
+
+  @@map("admin")
+}
+
+model CartItem {
+  mSessionId       Int             @map("m_session_id")
+  mProductId       Int             @map("m_product_id")
+  mQuantity        Int             @default(1) @map("m_quantity")
+  mCreatedAt       DateTime        @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt      DateTime        @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  product          Product         @relation(fields: [mProductId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "cart_item_product_m_id_fk")
+  shopping_session ShoppingSession @relation(fields: [mSessionId], references: [mId], onDelete: Cascade, map: "cart_item_shopping_session_m_id_fk")
+
+  @@id([mSessionId, mProductId], map: "cart_item_pk")
+  @@map("cart_item")
+}
+
+model Category {
+  mId         Int       @id(map: "category_pk") @default(autoincrement()) @map("m_id")
+  mName       String    @unique(map: "category_m_name_uindex") @map("m_name")
+  mDesc       String    @map("m_desc")
+  mRightNode  Int       @map("m_right_node")
+  mLeftNode   Int       @map("m_left_node")
+  mCreateAt   DateTime  @default(now()) @map("m_create_at") @db.Timestamp(6)
+  mModifiedAt DateTime  @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  product     Product[] @relation("categoryToproduct")
+
+  @@map("category")
+}
+
+model Discount {
+  mId              Int               @id(map: "discount_pk") @default(autoincrement()) @map("m_id")
+  mCode            String            @unique(map: "discount_m_code_uindex") @map("m_code")
+  mPercent         Int               @map("m_percent")
+  mDesc            String            @map("m_desc")
+  mMaxDiscount     Decimal           @map("m_max_discount") @db.Money
+  mExpire          DateTime          @default(now()) @map("m_expire") @db.Timestamp(6)
+  mCreatedAt       DateTime          @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  product_discount ProductDiscount[]
+
+  @@map("discount")
+}
+
+model Manufacturer {
+  mId         Int       @id(map: "manufacturer_pk") @map("m_id")
+  mName       String?   @map("m_name")
+  mDesc       String?   @map("m_desc")
+  mLogo       String?   @map("m_logo")
+  mCreatedAt  DateTime  @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt DateTime  @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  product     Product[] @relation("manufacturerToproduct")
+
+  @@map("manufacturer")
+}
+
+model Order {
+  mId                   Int                   @id(map: "order_pk") @default(autoincrement()) @map("m_id")
+  mUserId               Int                   @map("m_user_id")
+  mPaymentId            Int                   @map("m_payment_id")
+  mStatus               String                @map("m_status") @db.VarChar(50)
+  mCreatedAt            DateTime              @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt           DateTime              @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mAddress              String                @map("m_address")
+  user                  User                  @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
+  order_item            OrderItem[]
+  order_payment         OrderPayment?
+  order_shipping_status OrderShippingStatus[]
+
+  @@map("order")
+}
+
+model OrderItem {
+  mOrderId    Int      @map("m_order_id")
+  mProductId  Int      @map("m_product_id")
+  mQuantity   Int      @default(1) @map("m_quantity")
+  mCreatedAt  DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt DateTime @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  order       Order    @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_order_m_id_fk")
+  product     Product  @relation(fields: [mProductId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_product_m_id_fk")
+
+  @@id([mOrderId, mProductId], map: "order_item_pk")
+  @@map("order_item")
+}
+
+model OrderPayment {
+  mOrderId    Int      @id(map: "order_payment_pk") @map("m_order_id")
+  mAmount     Int      @map("m_amount")
+  mProvider   String   @map("m_provider")
+  mStatus     String   @map("m_status") @db.VarChar(50)
+  mCreatedAt  DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt DateTime @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  order       Order    @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_payment_order_m_id_fk")
+
+  @@map("order_payment")
+}
+
+model OrderShippingStatus {
+  mOrderId   Int      @map("m_order_id")
+  mStatus    Int      @map("m_status")
+  mProvider  String   @map("m_provider") @db.VarChar
+  mReason    String   @map("m_reason")
+  mCreatedAt DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
+  order      Order    @relation(fields: [mOrderId], references: [mId], onDelete: Cascade, map: "order_shipping_order_m_id_fk")
+
+  @@id([mOrderId, mCreatedAt], map: "order_shipping_status_pk")
+  @@map("order_shipping_status")
+}
+
+model Origin {
+  mId      Int       @id(map: "origin_pk") @default(autoincrement()) @map("m_id")
+  mCountry String    @unique(map: "origin_m_country_uindex") @map("m_country")
+  mFlag    String?   @map("m_flag")
+  product  Product[]
+
+  @@map("origin")
+}
+
+model Product {
+  mId              Int               @id(map: "product_pk") @map("m_id")
+  mSku             String?           @map("m_sku")
+  mName            String?           @map("m_name")
+  mDesc            String?           @map("m_desc")
+  mPrice           Decimal?          @default(0) @map("m_price") @db.Money
+  mManuId          Int?              @map("m_manu_id")
+  mCreatedAt       DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mPhotos          String[]          @map("m_img")
+  m_category_id    Int?
+  mOriginId        Int?              @map("m_origin_id")
+  mRatingCount     Int               @default(0) @map("m_rating_count")
+  mAvgRating       Int               @default(5) @map("m_avg_rating")
+  mStatus          String?           @default("ACTIVE") @map("m_status")
+  category         Category?         @relation("categoryToproduct", fields: [m_category_id], references: [mId], onUpdate: SetNull, map: "product_category_m_id_fk")
+  manufacturer     Manufacturer?     @relation("manufacturerToproduct", fields: [mManuId], references: [mId], onUpdate: SetNull, map: "product_manufacturer_m_id_fk")
+  origin           Origin?           @relation(fields: [mOriginId], references: [mId], onUpdate: SetNull, map: "product_origin_m_id_fk")
+  cart_item        CartItem[]
+  order_item       OrderItem[]
+  product_discount ProductDiscount[]
+  user_rating      UserRating[]
+
+  @@map("product")
+}
+
+model ProductDiscount {
+  mProductId  Int       @map("m_product_id")
+  mDiscountId Int       @map("m_discount_id")
+  mCreatedAt  DateTime? @default(now()) @map("m_created_at") @db.Timestamp(6)
+  discount    Discount  @relation(fields: [mDiscountId], references: [mId], onDelete: Cascade, map: "product_discount_discount_m_id_fk")
+  product     Product   @relation(fields: [mProductId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "product_discount_product_m_id_fk")
+
+  @@id([mProductId, mDiscountId], map: "product_discount_pk")
+  @@map("product_discount")
+}
+
+model ShoppingSession {
+  mId         Int        @id(map: "shopping_session_pk") @map("m_id")
+  mUserId     Int        @map("m_user_id")
+  mTotal      Int        @map("m_total")
+  mCreatedAt  DateTime   @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt DateTime   @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  user        User       @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "shopping_session_user_m_id_fk")
+  cart_item   CartItem[]
+
+  @@map("shopping_session")
+}
+
+model User {
+  mId              Int               @id(map: "user_pk") @default(autoincrement()) @map("m_id")
+  mEmail           String            @unique(map: "user_email_uindex") @map("m_email")
+  mPassword        String            @map("m_password")
+  mName            String            @map("m_name")
+  mAvatar          String?           @map("m_avatar")
+  mLastLogin       DateTime?         @default(now()) @map("m_last_login") @db.Timestamp(6)
+  mCreatedAt       DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  order            Order[]
+  shopping_session ShoppingSession[]
+  user_address     UserAddress[]
+  user_rating      UserRating[]
+
+  @@map("user")
+}
+
+model UserAddress {
+  mId       Int    @id(map: "user_address_pk") @default(autoincrement()) @map("m_id")
+  mUserId   Int    @map("m_user_id")
+  mType     String @map("m_type")
+  mPhone    String @map("m_phone")
+  mCity     String @map("m_city")
+  mDistrict String @map("m_district")
+  mWard     String @map("m_ward")
+  mAddress  String @map("m_address")
+  user      User   @relation(fields: [mUserId], references: [mId], onDelete: Cascade, map: "user_address_user_m_id_fk")
+
+  @@map("user_address")
+}
+
+model UserRating {
+  mId        Int       @id(map: "user_rating_pk") @default(autoincrement()) @map("m_id")
+  mUserId    Int?      @map("m_user_id")
+  mProductId Int?      @map("m_product_id")
+  mRating    Int?      @map("m_rating")
+  mContent   String?   @map("m_content")
+  mPhotos    String[]  @map("m_photos")
+  mCreatedAt DateTime? @map("m_created_at") @db.Timestamp(6)
+  product    Product?  @relation(fields: [mProductId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "user_rating_product_m_id_fk")
+  user       User?     @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "user_rating_user_m_id_fk")
+
+  @@map("user_rating")
+}

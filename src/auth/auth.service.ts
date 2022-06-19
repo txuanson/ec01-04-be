@@ -1,7 +1,7 @@
 import { AuthLoginDto, AuthRegisterDto } from '@/auth/dto';
 import { Token } from '@/auth/types/token.type';
 import { UserService } from '@/user/user.service';
-import { ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, ConflictException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import argon2 from 'argon2'
 @Injectable()
@@ -12,26 +12,38 @@ export class AuthService {
   ) { }
 
   async login(dto: AuthLoginDto): Promise<Token> {
-    const user = await this.userService.findByEmail(dto.email);
-    if (!user || (await argon2.verify(user.password, dto.password)) === false) {
+    const user = await this.userService.findByEmail(dto.mEmail);
+
+    if (!user || (await this.verifyPassword(user.mPassword, dto.mPassword)) === false) {
       throw new UnauthorizedException(['Email or password were incorrect!'])
     }
 
     return {
-      accessToken: this.jwtService.sign({ sub: user.id, email: user.email })
+      accessToken: this.jwtService.sign({ sub: user.mId, email: user.mEmail })
     }
   }
 
   async register(dto: AuthRegisterDto): Promise<any> {
-    if (await this.userService.existByEmail(dto.email)) {
-      throw new ConflictException(['Email already exists!'])
+    if (this.userService.exists(dto.mEmail)) {
+      throw new BadRequestException('This email is already used!');
     }
 
-    return this.userService.create(dto)
+    dto.mPassword = await this.hashPassword(dto.mPassword);
+
+    await this.userService.create(dto, dto.mEmail.split('@')[0])
+
+    return { message: 'OK' }
   }
 
   async logout() { }
 
   async refreshToken() { }
 
+  private async hashPassword(plainPassword: string): Promise<string> {
+    return argon2.hash(plainPassword);
+  }
+
+  private async verifyPassword(hashedPassword: string, plainPassword: string) {
+    return argon2.verify(hashedPassword, plainPassword);
+  }
 }

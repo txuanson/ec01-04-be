@@ -5,10 +5,10 @@ export class AuthLoginDto {
   @IsEmail()
   @IsNotEmpty()
   @Type(() => String)
-  readonly email: string;
+  readonly mEmail: string;
 
   @IsString()
   @IsNotEmpty()
   @Type(() => String)
-  readonly password: string;
+  readonly mPassword: string;
 }

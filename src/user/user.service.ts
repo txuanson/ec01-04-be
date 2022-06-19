@@ -1,37 +1,33 @@
-import { Injectable } from '@nestjs/common';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { UserDocument, UserEntity } from '@/user/user.schema';
+import { BadRequestException, ClassSerializerInterceptor, Injectable, UseInterceptors } from '@nestjs/common';
 import { UserCreateDto } from './dto/user.create.dto';
 import { AuthRegisterDto } from '@/auth/dto';
+import { PrismaService } from '@/prisma/prisma.service';
+import argon2 from 'argon2';
+import { User } from '@/user/user.entity';
 
 @Injectable()
 export class UserService {
   constructor(
-    @InjectModel(UserEntity.name) private readonly userModel: Model<UserDocument>
+    private prisma: PrismaService
   ) { }
 
-  async create(dto: AuthRegisterDto): Promise<UserDocument> {
-    return this.userModel.create(dto);
+  async create(dto: AuthRegisterDto, mName: string) {
+    await this.prisma.user.create({
+      data: { ...dto, mName }
+    });
   }
 
-  async findAll(): Promise<UserDocument[]> {
-    return this.userModel.find().exec()
-  }
+  async exists(mEmail: string): Promise<Boolean> {
+    const userExists = await this.prisma.user.findUnique({
+      where: { mEmail }
+    })
 
-  async findByEmail(email: string): Promise<UserDocument> {
-    return this.userModel.findOne({ email }).exec()
+    return userExists ? true : false;
   }
-
-  async existByEmail(email: string): Promise<Boolean> {
-    return this.userModel.exists({ email }).exec().then(value => value != null)
-  }
-
-  async findById(id: string): Promise<UserDocument> {
-    return this.userModel.findById(id).exec()
-  }
-
-  async deleteById(id: string): Promise<UserDocument> {
-    return this.userModel.findByIdAndDelete(id).exec()
+  
+  async findByEmail(mEmail: string): Promise<User> {
+    return await this.prisma.user.findUnique({
+      where: { mEmail }
+    })
   }
 }

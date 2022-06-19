@@ -3,17 +3,10 @@ import { IsEmail, IsNotEmpty, IsString, MaxLength, MinLength } from "class-valid
 
 export class AuthRegisterDto {
   @IsNotEmpty()
-  @IsString()
-  @MinLength(1)
-  @MaxLength(100)
-  @Type(() => String)
-  readonly name: string;
-
-  @IsNotEmpty()
   @IsEmail()
   @MaxLength(100)
   @Type(() => String)
-  readonly email: string;
+  readonly mEmail: string;
 
   @IsNotEmpty()
   @IsString()
@@ -21,5 +14,5 @@ export class AuthRegisterDto {
   @MaxLength(30)
   @Type(() => String)
   //@IsPasswordStrong()
-  readonly password: string;
+  mPassword: string;
 }

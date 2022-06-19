@@ -20,6 +20,9 @@
       "@/utils/*": [
         "src/utils/*"
       ],
+      "@/prisma/*": [
+        "prisma/*"
+      ],
     },
     "incremental": true,
     "skipLibCheck": true,
