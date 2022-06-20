@@ -184,18 +184,19 @@ model ShoppingSession {
 }
 
 model User {
-  mId              Int               @id(map: "user_pk") @default(autoincrement()) @map("m_id")
-  mEmail           String            @unique(map: "user_email_uindex") @map("m_email")
-  mPassword        String            @map("m_password")
-  mName            String            @map("m_name")
-  mAvatar          String?           @map("m_avatar")
-  mLastLogin       DateTime?         @default(now()) @map("m_last_login") @db.Timestamp(6)
-  mCreatedAt       DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6)
-  order            Order[]
-  shopping_session ShoppingSession[]
-  user_address     UserAddress[]
-  user_rating      UserRating[]
+  mId                   Int                  @id(map: "user_pk") @default(autoincrement()) @map("m_id")
+  mEmail                String               @unique(map: "user_email_uindex") @map("m_email")
+  mPassword             String               @map("m_password")
+  mName                 String               @map("m_name")
+  mAvatar               String?              @map("m_avatar")
+  mLastLogin            DateTime?            @default(now()) @map("m_last_login") @db.Timestamp(6)
+  mCreatedAt            DateTime?            @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt           DateTime             @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  forget_password_token ForgetPasswordToken? @relation("forget_password_tokenTouser")
+  order                 Order[]
+  shopping_session      ShoppingSession[]
+  user_address          UserAddress[]
+  user_rating           UserRating[]
 
   @@map("user")
 }
@@ -226,4 +227,14 @@ model UserRating {
   user       User?     @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "user_rating_user_m_id_fk")
 
   @@map("user_rating")
+}
+
+model ForgetPasswordToken {
+  mUserId    Int      @id(map: "forget_password_token_pk") @map("m_user_id")
+  mToken     String   @unique(map: "forget_password_token_m_token_uindex") @map("m_token")
+  mExpire    DateTime @map("m_expire") @db.Timestamp(6)
+  mCreatedAt DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
+  user       User     @relation("forget_password_tokenTouser", fields: [mUserId], references: [mId], onDelete: Cascade, map: "forget_password_token_user_m_id_fk")
+
+  @@map("forget_password_token")
 }
