@@ -29,6 +29,7 @@
     "strictNullChecks": false,
     "strict": false,
     "esModuleInterop": true,
+    "noEmit": false,
     "noImplicitAny": false,
     "strictBindCallApply": false,
     "forceConsistentCasingInFileNames": false,
