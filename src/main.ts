@@ -5,7 +5,7 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.use(helmet())
   app.useGlobalPipes(new ValidationPipe())
   const config = new DocumentBuilder()
