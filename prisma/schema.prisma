@@ -238,3 +238,10 @@ model ForgetPasswordToken {
 
   @@map("forget_password_token")
 }
+
+model category_temp {
+  m_id     Int    @id(map: "category_temp_pk")
+  m_name   String
+  m_desc   String @default("")
+  m_parent Int?
+}

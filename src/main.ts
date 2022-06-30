@@ -5,12 +5,12 @@ import helmet from 'helmet';
 import { AppModule } from './app.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { cors: true });
   app.use(helmet())
   app.useGlobalPipes(new ValidationPipe())
   const config = new DocumentBuilder()
     .setTitle('Himitu API')
-    .setDescription('The cats API description')
+    .setDescription('E-commerce API for Himitu')
     .setVersion('1.0')
     .build();
   const document = SwaggerModule.createDocument(app, config);
