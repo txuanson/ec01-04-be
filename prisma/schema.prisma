@@ -15,7 +15,7 @@ model Admin {
   mRole       String?   @map("m_role") @db.VarChar(32)
   mLastLogin  DateTime? @default(now()) @map("m_last_login") @db.Timestamp(6)
   mCreatedAt  DateTime? @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt DateTime? @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt DateTime? @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   mId         Int       @id(map: "admin_pk") @default(autoincrement()) @map("m_id")
 
   @@map("admin")
@@ -26,7 +26,7 @@ model CartItem {
   mProductId       Int             @map("m_product_id")
   mQuantity        Int             @default(1) @map("m_quantity")
   mCreatedAt       DateTime        @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt      DateTime        @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt      DateTime        @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   product          Product         @relation(fields: [mProductId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "cart_item_product_m_id_fk")
   shopping_session ShoppingSession @relation(fields: [mSessionId], references: [mId], onDelete: Cascade, map: "cart_item_shopping_session_m_id_fk")
 
@@ -39,14 +39,16 @@ model Category {
   mName           String     @unique(map: "category_m_name_uindex") @map("m_name")
   mDesc           String     @map("m_desc")
   mRightNode      Int        @map("m_right_node")
-  mLeftNode       Int        @map("m_left_node")
+  mLeftNode       Int        @unique(map: "category_m_left_node_uindex") @map("m_left_node")
   mCreateAt       DateTime   @default(now()) @map("m_create_at") @db.Timestamp(6)
-  mModifiedAt     DateTime   @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt     DateTime   @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   mParent         Int?       @map("m_parent")
   parentCategory  Category?  @relation("categoryTocategory_m_parent", fields: [mParent], references: [mId], onDelete: Cascade, map: "category_category_m_id_fk")
   childCategories Category[] @relation("categoryTocategory_m_parent")
   product         Product[]  @relation("categoryToproduct")
 
+  @@index([mParent], map: "category_m_parent_index")
+  @@index([mRightNode], map: "category_m_right_node_index")
   @@map("category")
 }
 
@@ -58,19 +60,19 @@ model Discount {
   mMaxDiscount     Decimal           @map("m_max_discount") @db.Money
   mExpire          DateTime          @default(now()) @map("m_expire") @db.Timestamp(6)
   mCreatedAt       DateTime          @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   product_discount ProductDiscount[]
 
   @@map("discount")
 }
 
 model Manufacturer {
-  mId         Int       @id(map: "manufacturer_pk") @map("m_id")
+  mId         Int       @id(map: "manufacturer_pk") @default(autoincrement()) @map("m_id")
   mName       String?   @map("m_name")
   mDesc       String?   @map("m_desc")
   mLogo       String?   @map("m_logo")
   mCreatedAt  DateTime  @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt DateTime  @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt DateTime  @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   product     Product[] @relation("manufacturerToproduct")
 
   @@map("manufacturer")
@@ -82,7 +84,7 @@ model Order {
   mPaymentId            Int                   @map("m_payment_id")
   mStatus               String                @map("m_status") @db.VarChar(50)
   mCreatedAt            DateTime              @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt           DateTime              @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt           DateTime              @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   mAddress              String                @map("m_address")
   user                  User                  @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
   order_item            OrderItem[]
@@ -97,7 +99,7 @@ model OrderItem {
   mProductId  Int      @map("m_product_id")
   mQuantity   Int      @default(1) @map("m_quantity")
   mCreatedAt  DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt DateTime @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt DateTime @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   order       Order    @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_order_m_id_fk")
   product     Product  @relation(fields: [mProductId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_product_m_id_fk")
 
@@ -111,7 +113,7 @@ model OrderPayment {
   mProvider   String   @map("m_provider")
   mStatus     String   @map("m_status") @db.VarChar(50)
   mCreatedAt  DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt DateTime @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt DateTime @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   order       Order    @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_payment_order_m_id_fk")
 
   @@map("order_payment")
@@ -146,7 +148,7 @@ model Product {
   mPrice           Decimal?          @default(0) @map("m_price") @db.Money
   mManuId          Int?              @map("m_manu_id")
   mCreatedAt       DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt      DateTime          @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   mPhotos          String[]          @map("m_img")
   m_category_id    Int?
   mOriginId        Int?              @map("m_origin_id")
@@ -180,7 +182,7 @@ model ShoppingSession {
   mUserId     Int        @map("m_user_id")
   mTotal      Int        @map("m_total")
   mCreatedAt  DateTime   @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt DateTime   @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt DateTime   @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   user        User       @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "shopping_session_user_m_id_fk")
   cart_item   CartItem[]
 
@@ -195,7 +197,7 @@ model User {
   mAvatar               String?              @map("m_avatar")
   mLastLogin            DateTime?            @default(now()) @map("m_last_login") @db.Timestamp(6)
   mCreatedAt            DateTime?            @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt           DateTime             @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mModifiedAt           DateTime             @default(now()) @map("m_modified_at") @db.Timestamp(6) @updatedAt
   forget_password_token ForgetPasswordToken? @relation("forget_password_tokenTouser")
   order                 Order[]
   shopping_session      ShoppingSession[]

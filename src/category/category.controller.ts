@@ -12,7 +12,7 @@ export class CategoryController {
   @Post()
   @ApiOperation({ summary: 'Create new category' })
   @ApiResponse({ status: 201, description: 'New category created', type: Category })
-  @ApiResponse({ status: 400, description: 'Bad request', type: BadRequestException })
+  @ApiResponse({ status: 400, description: 'Bad request'})
   @HttpCode(201)
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.create(createCategoryDto);
@@ -20,7 +20,7 @@ export class CategoryController {
 
   @Get()
   @ApiOperation({ summary: 'Get all root categories' })
-  @ApiResponse({ status: 200, description: 'List of roots categories', type: Category })
+  @ApiResponse({ status: 200, description: 'List of roots categories', type: Array<Category> })
   findAll() {
     return this.categoryService.findAll();
   }
