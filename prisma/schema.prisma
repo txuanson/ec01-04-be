@@ -1,5 +1,6 @@
 generator client {
-  provider = "prisma-client-js"
+  provider        = "prisma-client-js"
+  previewFeatures = ["interactiveTransactions"]
 }
 
 datasource db {
@@ -34,14 +35,17 @@ model CartItem {
 }
 
 model Category {
-  mId         Int       @id(map: "category_pk") @default(autoincrement()) @map("m_id")
-  mName       String    @unique(map: "category_m_name_uindex") @map("m_name")
-  mDesc       String    @map("m_desc")
-  mRightNode  Int       @map("m_right_node")
-  mLeftNode   Int       @map("m_left_node")
-  mCreateAt   DateTime  @default(now()) @map("m_create_at") @db.Timestamp(6)
-  mModifiedAt DateTime  @default(now()) @map("m_modified_at") @db.Timestamp(6)
-  product     Product[] @relation("categoryToproduct")
+  mId             Int        @id(map: "category_pk") @default(autoincrement()) @map("m_id")
+  mName           String     @unique(map: "category_m_name_uindex") @map("m_name")
+  mDesc           String     @map("m_desc")
+  mRightNode      Int        @map("m_right_node")
+  mLeftNode       Int        @map("m_left_node")
+  mCreateAt       DateTime   @default(now()) @map("m_create_at") @db.Timestamp(6)
+  mModifiedAt     DateTime   @default(now()) @map("m_modified_at") @db.Timestamp(6)
+  mParent         Int?       @map("m_parent")
+  parentCategory  Category?  @relation("categoryTocategory_m_parent", fields: [mParent], references: [mId], onDelete: Cascade, map: "category_category_m_id_fk")
+  childCategories Category[] @relation("categoryTocategory_m_parent")
+  product         Product[]  @relation("categoryToproduct")
 
   @@map("category")
 }

@@ -11,5 +11,4 @@ export class User implements PrismaUser {
 
   @Exclude()
   mPassword: string;
-  
 } 
