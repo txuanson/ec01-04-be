@@ -143,27 +143,27 @@ model Origin {
 }
 
 model Product {
-  mId             Int               @id(map: "product_pk") @map("m_id")
-  mSku            String?           @map("m_sku")
-  mName           String?           @map("m_name")
-  mDesc           String?           @map("m_desc")
-  mPrice          Decimal?          @default(0) @map("m_price") @db.Money
-  mManuId         Int?              @map("m_manu_id")
-  mCreatedAt      DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt     DateTime          @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-  mPhotos         String[]          @map("m_img")
-  mCategoryId     Int?              @map("m_category_id")
-  mOriginId       Int?              @map("m_origin_id")
-  mRatingCount    Int               @default(0) @map("m_rating_count")
-  mAvgRating      Int               @default(5) @map("m_avg_rating")
-  mStatus         String?           @default("ACTIVE") @map("m_status")
-  category        Category?         @relation("categoryToproduct", fields: [mCategoryId], references: [mId], onUpdate: SetNull, map: "product_category_m_id_fk")
-  manufacturer    Manufacturer?     @relation("manufacturerToproduct", fields: [mManuId], references: [mId], onUpdate: SetNull, map: "product_manufacturer_m_id_fk")
-  origin          Origin?           @relation(fields: [mOriginId], references: [mId], onUpdate: SetNull, map: "product_origin_m_id_fk")
-  cart_item       CartItem[]
-  order_item      OrderItem[]
-  productDiscount ProductDiscount[]
-  userRating      UserRating[]
+  mId          Int               @id(map: "product_pk") @map("m_id")
+  mSku         String?           @map("m_sku")
+  mName        String?           @map("m_name")
+  mDesc        String?           @map("m_desc")
+  mPrice       Decimal?          @default(0) @map("m_price") @db.Money
+  mManuId      Int?              @map("m_manu_id")
+  mCreatedAt   DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt  DateTime          @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  mPhotos      String[]          @map("m_img")
+  mCategoryId  Int?              @map("m_category_id")
+  mOriginId    Int?              @map("m_origin_id")
+  mRatingCount Int               @default(0) @map("m_rating_count")
+  mAvgRating   Int               @default(5) @map("m_avg_rating")
+  mStatus      String?           @default("ACTIVE") @map("m_status")
+  category     Category?         @relation("categoryToproduct", fields: [mCategoryId], references: [mId], onUpdate: SetNull, map: "product_category_m_id_fk")
+  manufacturer Manufacturer?     @relation("manufacturerToproduct", fields: [mManuId], references: [mId], onUpdate: SetNull, map: "product_manufacturer_m_id_fk")
+  origin       Origin?           @relation(fields: [mOriginId], references: [mId], onUpdate: SetNull, map: "product_origin_m_id_fk")
+  cart_item    CartItem[]
+  order_item   OrderItem[]
+  discounts    ProductDiscount[]
+  userRating   UserRating[]
 
   @@map("product")
 }
@@ -247,9 +247,10 @@ model ForgetPasswordToken {
   @@map("forget_password_token")
 }
 
-model category_temp {
-  m_id     Int    @id(map: "category_temp_pk")
-  m_name   String
-  m_desc   String @default("")
-  m_parent Int?
+model Photo {
+  mId         String   @id(map: "photo_pk") @map("m_id")
+  mCreatedAt  DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mMofifiedAt DateTime @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+
+  @@map("photo")
 }
