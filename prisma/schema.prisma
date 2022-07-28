@@ -53,6 +53,7 @@ model Category {
 }
 
 model Discount {
+<<<<<<< HEAD
   mId              Int               @id(map: "discount_pk") @default(autoincrement()) @map("m_id")
   mCode            String            @unique(map: "discount_m_code_uindex") @map("m_code")
   mPercent         Int               @map("m_percent")
@@ -62,6 +63,17 @@ model Discount {
   mCreatedAt       DateTime          @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt      DateTime          @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   product_discount ProductDiscount[]
+=======
+  mId          Int               @id(map: "discount_pk") @default(autoincrement()) @map("m_id")
+  mCode        String            @unique(map: "discount_m_code_uindex") @map("m_code")
+  mPercent     Int               @map("m_percent")
+  mDesc        String            @map("m_desc")
+  mMaxDiscount Decimal           @map("m_max_discount") @db.Money
+  mExpire      DateTime          @default(now()) @map("m_expire") @db.Timestamp(6)
+  mCreatedAt   DateTime          @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt  DateTime          @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  products     ProductDiscount[]
+>>>>>>> main
 
   @@map("discount")
 }
@@ -87,9 +99,9 @@ model Order {
   mModifiedAt           DateTime              @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   mAddress              String                @map("m_address")
   user                  User                  @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
-  order_item            OrderItem[]
-  order_payment         OrderPayment?
-  order_shipping_status OrderShippingStatus[]
+  orderItems            OrderItem[]
+  orderPayment          OrderPayment?
+  orderShippingStatuses OrderShippingStatus[]
 
   @@map("order")
 }
@@ -192,6 +204,7 @@ model ShoppingSession {
 }
 
 model User {
+<<<<<<< HEAD
   mId                   Int                  @id(map: "user_pk") @default(autoincrement()) @map("m_id")
   mEmail                String               @unique(map: "user_email_uindex") @map("m_email")
   mPassword             String               @map("m_password")
@@ -205,6 +218,21 @@ model User {
   shopping_session      ShoppingSession[]
   user_address          UserAddress[]
   user_rating           UserRating[]
+=======
+  mId                 Int                  @id(map: "user_pk") @default(autoincrement()) @map("m_id")
+  mEmail              String               @unique(map: "user_email_uindex") @map("m_email")
+  mPassword           String               @map("m_password")
+  mName               String               @map("m_name")
+  mAvatar             String?              @map("m_avatar")
+  mLastLogin          DateTime?            @default(now()) @map("m_last_login") @db.Timestamp(6)
+  mCreatedAt          DateTime?            @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt         DateTime             @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  forgetPasswordToken ForgetPasswordToken? @relation("forget_password_tokenTouser")
+  order               Order[]
+  shoppingSessions    ShoppingSession[]
+  userAddresses       UserAddress[]
+  userRatings         UserRating[]
+>>>>>>> main
 
   @@map("user")
 }
