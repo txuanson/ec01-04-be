@@ -12,6 +12,7 @@ async function bootstrap() {
     .setTitle('Himitu API')
     .setDescription('E-commerce API for Himitu')
     .setVersion('1.0')
+    .addBearerAuth()
     .build();
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('explorer', app, document);
