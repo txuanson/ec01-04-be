@@ -15,7 +15,7 @@ import { OriginModule } from './origin/origin.module';
     UserModule,
     CategoryModule,
     ManufacturerModule,
-    OriginModule
+    OriginModule,
   ]
 })
 export class AppModule { }

@@ -246,11 +246,3 @@ model ForgetPasswordToken {
 
   @@map("forget_password_token")
 }
-
-model Photo {
-  mId         String   @id(map: "photo_pk") @map("m_id")
-  mCreatedAt  DateTime @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mMofifiedAt DateTime @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-
-  @@map("photo")
-}
