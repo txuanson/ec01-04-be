@@ -1,6 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { ProductStatus } from './constant/product-status.constant';
+import { ProductVariantStatus } from './constant/product-variant.constant';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -14,8 +15,7 @@ export class ProductService {
   async create(createProductDto: CreateProductDto) {
     return await this.prisma.product.create({
       data: {
-        ...createProductDto,
-        mStatus: ProductStatus.HIDE
+        ...createProductDto
       }
     })
   }
@@ -31,7 +31,7 @@ export class ProductService {
         } : {})
         ,
         mStatus: {
-          notIn: [ProductStatus.HIDE, ProductStatus.DELETED]
+          notIn: [ProductStatus.HIDDEN, ProductStatus.DELETED]
         },
         mManuId: {
           in: findProductDto.manufacturer
@@ -51,7 +51,11 @@ export class ProductService {
         mRatingCount: true,
         mAvgRating: true,
         mStatus: true,
-        variant: true,
+        variant: {
+          where: {
+            mStatus: ProductVariantStatus.ACTIVE
+          }
+        },
         origin: {
           select: {
             mId: true,
@@ -84,7 +88,7 @@ export class ProductService {
       where: {
         mId: id,
         mStatus: {
-          notIn: [ProductStatus.HIDE, ProductStatus.DELETED]
+          notIn: [ProductStatus.HIDDEN, ProductStatus.DELETED]
         }
       },
       select: {
@@ -95,7 +99,13 @@ export class ProductService {
         mRatingCount: true,
         mAvgRating: true,
         mStatus: true,
-        variant: true,
+        variant: {
+          where: {
+            mStatus: {
+              not: ProductVariantStatus.DELETED
+            }
+          }
+        },
         origin: {
           select: {
             mId: true,

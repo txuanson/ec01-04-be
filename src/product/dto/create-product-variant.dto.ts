@@ -1,19 +1,17 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { IsOptional, IsString } from "class-validator";
 
-export class CreateProductDto {
+export class  CreateProductVariantDto {
   @ApiProperty()
-  mName: string;
+  mSku: string;
   @ApiProperty()
-  mDesc: string;
+  mVariantValue: string;
   @ApiProperty()
-  mManuId?: number;
+  mPrice: number;
   @ApiProperty()
-  mPhotos: string[];
+  mVariantType: string;
   @ApiProperty()
-  mCategoryId?: number;
-  @ApiProperty()
-  mOriginId?: number;
+  mStock: number;
   @ApiProperty()
   @IsOptional()
   @IsString()

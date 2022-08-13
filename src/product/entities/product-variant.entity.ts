@@ -7,11 +7,16 @@ export class ProductVariant implements PrismaProductVariant {
   @ApiProperty()
   mSku: string;
   @ApiProperty()
-  mVariantValue: number;
+  mVariantValue: string;
   @ApiProperty()
   mPrice: number;
   @ApiProperty()
   mVariantType: string;
   @ApiProperty()
   mStock: number;
+  @ApiProperty()
+  mStatus: string;
+
+  mCreatedAt: Date;
+  mModifiedAt: Date;
 }
