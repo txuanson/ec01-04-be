@@ -2,21 +2,24 @@ import { AuthService } from '@/auth/auth.service';
 import { AuthLoginDto, AuthRegisterDto } from '@/auth/dto';
 import { AuthForgotPasswordRequestDto } from '@/auth/dto/auth.forgot.request.dto';
 import { AuthResetPasswordDto, AuthResetPasswordVerifyDto } from '@/auth/dto/auth.reset.password.dto';
-import { BadRequestException, Body, Controller, HttpCode, Post } from '@nestjs/common';
-import { ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { BadRequestException, Body, Controller, HttpCode, Post, Request, UseGuards } from '@nestjs/common';
+import { ApiBody, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Token } from '@/auth/types/token.type';
+import { LocalAuthGuard } from './guards/local.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) { }
 
+  @UseGuards(LocalAuthGuard)
   @Post('/login')
   @ApiOperation({ summary: 'Client login' })
+  @ApiBody({ type: AuthLoginDto })
   @ApiResponse({ status: 200, description: 'Login success, return access token', type: Token })
   @ApiResponse({ status: 401, description: 'Unauthorized, user given wrong credentials', type: BadRequestException })
   @HttpCode(200)
-  async login(@Body() dto: AuthLoginDto) {
-    return this.authService.login(dto)
+  async login(@Request() req): Promise<Token> {
+    return this.authService.login(req.user)
   }
 
   @Post('/register')

@@ -16,10 +16,20 @@ export class AuthService {
     private readonly jwtService: JwtService
   ) { }
 
+  async authenticate(email: string, password: string) {
+    const user = await this.userService.findByEmail(email);
+
+    if (!user || !(await this._verifyPassword(user.mPassword, password))) {
+      throw new UnauthorizedException(['Email or password were incorrect!']);
+    }
+
+    return user;
+  }
+
   async login(dto: AuthLoginDto): Promise<Token> {
     const user = await this.userService.findByEmail(dto.mEmail);
 
-    if (!user || (await this._verifyPassword(user.mPassword, dto.mPassword)) === false) {
+    if (!user || !(await this._verifyPassword(user.mPassword, dto.mPassword))) {
       throw new UnauthorizedException(['Email or password were incorrect!']);
     }
 

@@ -1,5 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
 import { CreateManufacturerDto } from './dto/create-manufacturer.dto';
 import { UpdateManufacturerDto } from './dto/update-manufacturer.dto';
 
@@ -11,11 +12,17 @@ export class ManufacturerService {
   ) { }
 
   async create(createManufacturerDto: CreateManufacturerDto) {
-    return await this.prisma.manufacturer.create({
-      data: {
-        ...createManufacturerDto
+    try {
+      return await this.prisma.manufacturer.create({
+        data: {
+          ...createManufacturerDto
+        }
+      });
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        throw new BadRequestException(`Manufacturer named \`${createManufacturerDto.mName}\` already exists`);
       }
-    })
+    }
   }
 
   async findAll() {
@@ -31,14 +38,20 @@ export class ManufacturerService {
   }
 
   async update(id: number, updateManufacturerDto: UpdateManufacturerDto) {
-    return await this.prisma.manufacturer.update({
-      where: {
-        mId: id
-      },
-      data: {
-        ...updateManufacturerDto
+    try {
+      return await this.prisma.manufacturer.update({
+        where: {
+          mId: id
+        },
+        data: {
+          ...updateManufacturerDto
+        }
+      })
+    } catch (e) {
+      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
+        throw new BadRequestException(`Manufacturer named \`${updateManufacturerDto.mName}\` already exists`);
       }
-    })
+    }
   }
 
   async remove(id: number) {
