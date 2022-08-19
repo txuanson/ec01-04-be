@@ -178,12 +178,12 @@ model ProductDiscount {
 }
 
 model ShoppingSession {
-  mId         Int        @id(map: "shopping_session_pk") @map("m_id")
-  mUserId     Int        @map("m_user_id")
-  mTotal      Int        @map("m_total")
+  mId         Int        @id(map: "shopping_session_pk") @default(autoincrement()) @map("m_id")
+  mUserId     Int?       @map("m_user_id")
+  mTotal      Int        @default(0) @map("m_total")
   mCreatedAt  DateTime   @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt DateTime   @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-  user        User       @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "shopping_session_user_m_id_fk")
+  user        User?      @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "shopping_session_user_m_id_fk")
   cart_item   CartItem[]
 
   @@map("shopping_session")

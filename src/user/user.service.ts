@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { AuthRegisterDto } from '@/auth/dto';
 import { PrismaService } from '@/prisma/prisma.service';
-import { User } from '@/user/entities/user.entity';
+import { UserEntity } from '@/user/entities/user.entity';
 import { UserUpdatePasswordDto } from '@/user/dto/update-user-password.dto';
 
 @Injectable()
@@ -35,9 +35,24 @@ export class UserService {
     return userExists ? true : false;
   }
 
-  async findByEmail(mEmail: string): Promise<User> {
-    return await this.prisma.user.findUnique({
-      where: { mEmail }
+  async findByEmail(mEmail: string): Promise<UserEntity> {
+    return await this.prisma.user.findUniqueOrThrow({
+      where: { mEmail },
+    })
+  }
+
+  async findById(userId: number): Promise<Omit<UserEntity, 'mPassword' | 'mCreatedAt' | 'mModifiedAt'>> {
+    return await this.prisma.user.findUniqueOrThrow({
+      where: {
+        mId: userId
+      },
+      select: {
+        mId: true,
+        mAvatar: true,
+        mEmail: true,
+        mLastLogin: true,
+        mName: true
+      }
     })
   }
 }

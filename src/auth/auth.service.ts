@@ -3,6 +3,7 @@ import { AuthForgotPasswordRequestDto } from '@/auth/dto/auth.forgot.request.dto
 import { AuthResetPasswordDto, AuthResetPasswordVerifyDto } from '@/auth/dto/auth.reset.password.dto';
 import { Token } from '@/auth/types/token.type';
 import { PrismaService } from '@/prisma/prisma.service';
+import { UserEntity } from '@/user/entities/user.entity';
 import { UserService } from '@/user/user.service';
 import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -26,13 +27,7 @@ export class AuthService {
     return user;
   }
 
-  async login(dto: AuthLoginDto): Promise<Token> {
-    const user = await this.userService.findByEmail(dto.mEmail);
-
-    if (!user || !(await this._verifyPassword(user.mPassword, dto.mPassword))) {
-      throw new UnauthorizedException(['Email or password were incorrect!']);
-    }
-
+  async signToken(user: UserEntity): Promise<Token> {
     return {
       accessToken: this.jwtService.sign({ sub: user.mId, email: user.mEmail })
     }

@@ -1,8 +1,9 @@
-import { ValidationPipe } from '@nestjs/common';
-import { NestFactory } from '@nestjs/core';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import helmet from 'helmet';
 import { AppModule } from './app.module';
+import { AuthenticationGuard } from './auth/guards/auth.guard';
 import { NotFoundInterceptor } from './util/interceptor/not-found.interceptor';
 
 async function bootstrap() {
@@ -18,6 +19,7 @@ async function bootstrap() {
   const document = SwaggerModule.createDocument(app, config);
   SwaggerModule.setup('explorer', app, document);
   app.useGlobalInterceptors(new NotFoundInterceptor())
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
   await app.listen(process.env.PORT || 3000);
 }
 bootstrap();
