@@ -2,7 +2,7 @@ import { JwtPayload } from '@/auth/types/jwt-payload.type';
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { CreateCartDto } from './dto/create-cart.dto';
-import { UpdateCartDto } from './dto/update-cart.dto';
+import { UpdateCartDto, UpdateCartOperation } from './dto/update-cart.dto';
 
 @Injectable()
 export class CartService {
@@ -10,7 +10,7 @@ export class CartService {
   constructor(private prisma: PrismaService) { }
 
   async create(user: JwtPayload) {
-    return await this.prisma.shoppingSession.create({
+    return this.prisma.shoppingSession.create({
       data: {
         mUserId: user?.id
       }
@@ -21,15 +21,67 @@ export class CartService {
     return `This action returns all cart`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} cart`;
+  async findSessionByUserId(userId: number) {
+    return this.prisma.shoppingSession.findFirst({
+      where: {
+        mUserId: userId
+      },
+      include: {
+        cartItem: true
+      }
+    })
   }
 
-  update(id: number, updateCartDto: UpdateCartDto) {
-    return `This action updates a #${id} cart`;
+  async findOne(user: JwtPayload, id: number) {
+    return this.prisma.shoppingSession.findFirstOrThrow({
+      where: {
+        mUserId: user?.id,
+        mId: id
+      },
+      include: {
+        cartItem: true
+      }
+    })
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} cart`;
+  async update(id: number, updateCartDto: UpdateCartDto) {
+    if (updateCartDto.operation === UpdateCartOperation.ADD) {
+      return this.prisma.cartItem.upsert({
+        create: {
+          mSessionId: id,
+          mProductId: updateCartDto.mProductId,
+          mSku: updateCartDto.mSku,
+          mQuantity: updateCartDto.mQuantity
+        },
+        update: {
+          mQuantity: updateCartDto.mQuantity
+        },
+        where: {
+          mSessionId_mProductId_mSku: {
+            mSessionId: id,
+            mProductId: updateCartDto.mProductId,
+            mSku: updateCartDto.mSku
+          }
+        }
+      })
+    } else if (updateCartDto.operation === UpdateCartOperation.REMOVE) {
+      return this.prisma.cartItem.delete({
+        where: {
+          mSessionId_mProductId_mSku: {
+            mSessionId: id,
+            mProductId: updateCartDto.mProductId,
+            mSku: updateCartDto.mSku
+          }
+        }
+      });
+    }
+  }
+
+  async remove(id: number) {
+    return this.prisma.shoppingSession.delete({
+      where: {
+        mId: id
+      }
+    });
   }
 }

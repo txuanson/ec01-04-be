@@ -22,14 +22,14 @@ model Admin {
 }
 
 model CartItem {
-  mSessionId       Int             @map("m_session_id")
-  mProductId       Int             @map("m_product_id")
-  mQuantity        Int             @default(1) @map("m_quantity")
-  mCreatedAt       DateTime        @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt      DateTime        @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-  mSku             String          @unique(map: "cart_item_m_sku_uindex") @map("m_sku")
-  product_variant  ProductVariant  @relation("cart_itemToproduct_variant", fields: [mProductId, mSku], references: [mProductId, mSku], onDelete: NoAction, onUpdate: NoAction, map: "cart_item_product_variant_m_product_id_m_sku_fk")
-  shopping_session ShoppingSession @relation(fields: [mSessionId], references: [mId], onDelete: Cascade, map: "cart_item_shopping_session_m_id_fk")
+  mSessionId      Int             @map("m_session_id")
+  mProductId      Int             @map("m_product_id")
+  mQuantity       Int             @default(1) @map("m_quantity")
+  mCreatedAt      DateTime        @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt     DateTime        @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  mSku            String          @map("m_sku")
+  productVariant  ProductVariant  @relation("cart_itemToproduct_variant", fields: [mProductId, mSku], references: [mProductId, mSku], onDelete: NoAction, onUpdate: NoAction, map: "cart_item_product_variant_m_product_id_m_sku_fk")
+  shoppingSession ShoppingSession @relation(fields: [mSessionId], references: [mId], onDelete: Cascade, map: "cart_item_shopping_session_m_id_fk")
 
   @@id([mSessionId, mProductId, mSku], map: "cart_item_pk")
   @@map("cart_item")
@@ -62,7 +62,7 @@ model Discount {
   mExpire      DateTime          @default(now()) @map("m_expire") @db.Timestamp(6)
   mCreatedAt   DateTime          @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt  DateTime          @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-  products     ProductDiscount[]
+  product      ProductDiscount[]
 
   @@map("discount")
 }
@@ -80,17 +80,17 @@ model Manufacturer {
 }
 
 model Order {
-  mId                   Int                   @id(map: "order_pk") @default(autoincrement()) @map("m_id")
-  mUserId               Int                   @map("m_user_id")
-  mPaymentId            Int                   @map("m_payment_id")
-  mStatus               String                @map("m_status") @db.VarChar(50)
-  mCreatedAt            DateTime              @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt           DateTime              @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-  mAddress              String                @map("m_address")
-  user                  User                  @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
-  orderItems            OrderItem[]
-  orderPayment          OrderPayment?
-  orderShippingStatuses OrderShippingStatus[]
+  mId                 Int                   @id(map: "order_pk") @default(autoincrement()) @map("m_id")
+  mUserId             Int                   @map("m_user_id")
+  mPaymentId          Int                   @map("m_payment_id")
+  mStatus             String                @map("m_status") @db.VarChar(50)
+  mCreatedAt          DateTime              @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt         DateTime              @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  mAddress            String                @map("m_address")
+  user                User                  @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
+  orderItems          OrderItem[]
+  orderPayment        OrderPayment?
+  orderShippingStatus OrderShippingStatus[]
 
   @@map("order")
 }
@@ -102,6 +102,7 @@ model OrderItem {
   mCreatedAt      DateTime       @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt     DateTime       @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   mSku            String         @unique(map: "order_item_m_sku_uindex") @map("m_sku")
+  m_price         Int            @default(0)
   order           Order          @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_order_m_id_fk")
   product_variant ProductVariant @relation("order_itemToproduct_variant", fields: [mProductId, mSku], references: [mProductId, mSku], onDelete: NoAction, onUpdate: NoAction, map: "order_item_product_variant_m_product_id_m_sku_fk")
 
@@ -179,12 +180,11 @@ model ProductDiscount {
 
 model ShoppingSession {
   mId         Int        @id(map: "shopping_session_pk") @default(autoincrement()) @map("m_id")
-  mUserId     Int?       @map("m_user_id")
-  mTotal      Int        @default(0) @map("m_total")
+  mUserId     Int?       @unique(map: "shopping_session_m_user_id_uindex") @map("m_user_id")
   mCreatedAt  DateTime   @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt DateTime   @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   user        User?      @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "shopping_session_user_m_id_fk")
-  cart_item   CartItem[]
+  cartItem    CartItem[]
 
   @@map("shopping_session")
 }
@@ -200,7 +200,7 @@ model User {
   mModifiedAt         DateTime             @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   forgetPasswordToken ForgetPasswordToken? @relation("forget_password_tokenTouser")
   order               Order[]
-  shoppingSessions    ShoppingSession[]
+  shoppingSessions    ShoppingSession?
   userAddresses       UserAddress[]
   userRatings         UserRating[]
 
