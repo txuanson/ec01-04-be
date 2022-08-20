@@ -7,6 +7,8 @@ export class Manufacturer implements PrismaManufacturer {
   @ApiProperty()
   mName: string;
   @ApiProperty()
+  mSlug: string;
+  @ApiProperty()
   mDesc: string;
   @ApiProperty()
   mLogo: string;

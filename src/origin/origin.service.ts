@@ -1,5 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { slugify } from 'src/util/slugify';
 import { CreateOriginDto } from './dto/create-origin.dto';
 import { UpdateOriginDto } from './dto/update-origin.dto';
 
@@ -11,11 +12,20 @@ export class OriginService {
   ) { }
 
   async create(createOriginDto: CreateOriginDto) {
-    return await this.prisma.origin.create({
+    const newOrigin = await this.prisma.origin.create({
       data: {
         ...createOriginDto
       }
     })
+
+    return this.prisma.origin.update({
+      where: {
+        mId: newOrigin.mId
+      },
+      data: {
+        mSlug: slugify(newOrigin.mCountry) + '-' + newOrigin.mId
+      }
+    });
   }
 
   async findAll() {
@@ -48,4 +58,19 @@ export class OriginService {
       }
     })
   }
+
+  // async updateSlug() {
+  //   const origins = await this.prisma.origin.findMany();
+
+  //   for (const origin of origins) {
+  //     await this.prisma.origin.update({
+  //       where: {
+  //         mId: origin.mId
+  //       },
+  //       data: {
+  //         mSlug: slugify(origin.mCountry) + '-' + origin.mId
+  //       }
+  //     })
+  //   }
+  // }
 }

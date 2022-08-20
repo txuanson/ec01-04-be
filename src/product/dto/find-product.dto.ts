@@ -19,7 +19,6 @@ export class FindProductDto {
   })
   @IsOptional()
   @IsArray()
-  @Transform(({ value }) => value.map((e: any) => Number(e)))
   @IsNumber({}, { each: true })
   readonly category?: number[];
 
@@ -29,18 +28,18 @@ export class FindProductDto {
     format: 'form',
   })
   @IsOptional()
-  @Transform(({ value }) => value.map((e: any) => Number(e)))
+  @IsArray()
   @IsNumber({}, { each: true })
-  readonly manufacturer?: number[];
+  readonly manufacturer?: number[] = [];
 
   @ApiProperty({
     type: [Number],
     format: 'form',
   })
   @IsOptional()
-  @Transform(({ value }) => value.map((e: any) => Number(e)))
+  @IsArray()
   @IsNumber({}, { each: true })
-  readonly origin?: number[];
+  readonly origin?: number[] = [];
 
   @ApiProperty()
   @IsOptional()

@@ -1,6 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
+import { slugify } from 'src/util/slugify';
 import { CreateManufacturerDto } from './dto/create-manufacturer.dto';
 import { UpdateManufacturerDto } from './dto/update-manufacturer.dto';
 
@@ -12,25 +13,28 @@ export class ManufacturerService {
   ) { }
 
   async create(createManufacturerDto: CreateManufacturerDto) {
-    try {
-      return await this.prisma.manufacturer.create({
-        data: {
-          ...createManufacturerDto
-        }
-      });
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw new BadRequestException(`Manufacturer named \`${createManufacturerDto.mName}\` already exists`);
+    const newManufacturer = await this.prisma.manufacturer.create({
+      data: {
+        ...createManufacturerDto,
       }
-    }
+    });
+
+    return this.prisma.manufacturer.update({
+      where: {
+        mId: newManufacturer.mId
+      },
+      data: {
+        mSlug: slugify(newManufacturer.mName) + '-' + newManufacturer.mId
+      }
+    });
   }
 
   async findAll() {
-    return await this.prisma.manufacturer.findMany()
+    return this.prisma.manufacturer.findMany()
   }
 
   async findOne(id: number) {
-    return await this.prisma.manufacturer.findUnique({
+    return this.prisma.manufacturer.findUnique({
       where: {
         mId: id
       }
@@ -38,27 +42,36 @@ export class ManufacturerService {
   }
 
   async update(id: number, updateManufacturerDto: UpdateManufacturerDto) {
-    try {
-      return await this.prisma.manufacturer.update({
-        where: {
-          mId: id
-        },
-        data: {
-          ...updateManufacturerDto
-        }
-      })
-    } catch (e) {
-      if (e instanceof Prisma.PrismaClientKnownRequestError && e.code === 'P2002') {
-        throw new BadRequestException(`Manufacturer named \`${updateManufacturerDto.mName}\` already exists`);
+    return this.prisma.manufacturer.update({
+      where: {
+        mId: id
+      },
+      data: {
+        ...updateManufacturerDto
       }
-    }
+    })
   }
 
   async remove(id: number) {
-    return await this.prisma.manufacturer.delete({
+    return this.prisma.manufacturer.delete({
       where: {
         mId: id
       }
     })
   }
+
+  // async updateSlug() {
+  //   const manufacturers = await this.prisma.manufacturer.findMany()
+  //   console.log(manufacturers)
+  //   for (const manufacturer of manufacturers) {
+  //     await this.prisma.manufacturer.update({
+  //       where: {
+  //         mId: manufacturer.mId
+  //       },
+  //       data: {
+  //         mSlug: slugify(manufacturer.mName) + '-' + manufacturer.mId
+  //       }
+  //     })
+  //   }
+  // }
 }

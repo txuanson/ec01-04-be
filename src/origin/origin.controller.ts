@@ -21,8 +21,8 @@ export class OriginController {
   @Get()
   @ApiOperation({ summary: 'Get all origins' })
   @ApiResponse({ status: 200, description: 'List of origins', type: Array<Origin> })
-  findAll() {
-    return this.originService.findAll();
+  async findAll() {
+    return await this.originService.findAll();
   }
 
   @Get(':id')

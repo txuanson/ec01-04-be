@@ -1,5 +1,7 @@
 import { PrismaService } from '@/prisma/prisma.service';
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { slugify } from 'src/util/slugify';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
@@ -11,7 +13,7 @@ export class CategoryService {
 
   async create(createCategoryDto: CreateCategoryDto) {
     if (createCategoryDto.mParentCategoryId === null) {
-      return await this.prisma.$transaction(async () => {
+      return this.prisma.$transaction(async () => {
         const maxNode = await this.prisma.category.aggregate({
           _max: {
             mRightNode: true
@@ -26,20 +28,28 @@ export class CategoryService {
             mRightNode: maxNode._max.mRightNode + 2,
           }
         })
+
+        await this.prisma.category.update({
+          where: {
+            mId: newCategory.mId
+          },
+          data: {
+            mSlug: slugify(newCategory.mName) + '-' + newCategory.mId
+          }
+        });
+
         return newCategory;
       })
     }
 
-    return await this.prisma.$transaction(async () => {
+    return this.prisma.$transaction(async () => {
       const parent = await this.prisma.category.findUnique({
         where: {
           mId: createCategoryDto.mParentCategoryId
         }
       });
 
-      console.log(parent)
-
-      const parentUpdate = await this.prisma.category.updateMany({
+      await this.prisma.category.updateMany({
         data: {
           mRightNode: {
             increment: 2
@@ -51,9 +61,7 @@ export class CategoryService {
           }
         }
       })
-      
-      console.log('parentUpdate: ', parentUpdate);
-      
+
       await this.prisma.category.updateMany({
         data: {
           mLeftNode: {
@@ -73,46 +81,129 @@ export class CategoryService {
           mDesc: createCategoryDto.mDesc,
           mLeftNode: parent.mRightNode,
           mRightNode: parent.mRightNode + 1,
-          mParent: createCategoryDto.mParentCategoryId
+          mParent: createCategoryDto.mParentCategoryId,
         }
       })
 
-      return category;
+      const newCategory = await this.prisma.category.update({
+        where: {
+          mId: category.mId
+        },
+        data: {
+          mSlug: slugify(category.mName) + '-' + category.mId
+        }
+      })
+
+      return newCategory;
     })
   }
 
   async findAll() {
-    return await this.prisma.category.findMany({
+    return this.prisma.category.findMany({
       where: {
         mParent: null
       },
-      include: {
-        childCategories: true
+      select: {
+        mId: true,
+        mName: true,
+        mDesc: true,
+        childCategories: {
+          select: {
+            mId: true,
+            mName: true,
+          }
+        },
       }
     })
   }
 
   async findOne(id: number) {
-    return await this.prisma.category.findUnique({
+    return this.prisma.category.findUnique({
       where: {
         mId: id
       },
-      include: {
-        childCategories: true,
-        parentCategory: true
+      select: {
+        mId: true,
+        mName: true,
+        mDesc: true,
+        childCategories: {
+          select: {
+            mId: true,
+            mName: true,
+          }
+        },
       }
     })
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  async update(id: number, updateCategoryDto: UpdateCategoryDto) {
+    return this.prisma.category.update({
+      where: {
+        mId: id
+      },
+      data: {
+        mName: updateCategoryDto.mName,
+        mDesc: updateCategoryDto.mDesc
+      }
+    });
+  }
+
+  async findCategoryPath(id: number) {
+    const thisCategory = await this.prisma.category.findUnique({
+      where: {
+        mId: id,
+      },
+      select: {
+        mLeftNode: true,
+      }
+    });
+
+    return this.prisma.category.findMany({
+      where: {
+        mLeftNode: {
+          lte: thisCategory.mLeftNode
+        },
+        mRightNode: {
+          gte: thisCategory.mLeftNode
+        }
+      },
+      select: {
+        mId: true,
+        mName: true,
+        mSlug: true,
+      },
+      orderBy: {
+        mLeftNode: 'asc'
+      }
+    })
   }
 
   async remove(id: number) {
-    return await this.prisma.category.delete({
+    return this.prisma.category.delete({
       where: {
         mId: id
       }
     })
   }
+
+  // async updateSlug() {
+  //   const categories = await this.prisma.category.findMany({
+  //     select: {
+  //       mId: true,
+  //       mName: true,
+  //     }
+  //   })
+  //   for (let i = 0; i < categories.length; i++) {
+  //     const category = categories[i];
+  //     const slug = slugify(category.mName);
+  //     await this.prisma.category.update({
+  //       where: {
+  //         mId: category.mId
+  //       },
+  //       data: {
+  //         mSlug: slug + '-' + category.mId
+  //       }
+  //     })
+  //   }
+  // }
 }

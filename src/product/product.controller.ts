@@ -9,12 +9,14 @@ import { ProductVariant } from './entities/product-variant.entity';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { ProductVariantService } from './product-variant.service';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
+import { CategoryService } from 'src/category/category.service';
 
 @Controller('product')
 export class ProductController {
   constructor(
     private readonly productService: ProductService,
-    private readonly productVariantService: ProductVariantService
+    private readonly productVariantService: ProductVariantService,
+    private readonly categoryService: CategoryService,
   ) { }
 
   @Post()
@@ -30,7 +32,7 @@ export class ProductController {
   @ApiResponse({ status: 200, description: 'List of products found', type: Array<Product> })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @HttpCode(200)
-  find(@Body() findProductDto: FindProductDto) {
+  async find(@Body() findProductDto: FindProductDto) {
     return this.productService.find(findProductDto);
   }
 
@@ -38,8 +40,14 @@ export class ProductController {
   @ApiOperation({ summary: 'Get product info' })
   @ApiResponse({ status: 200, description: 'Product info', type: Product })
   @ApiBadRequestResponse({ description: 'Bad request' })
-  findOne(@Param('id') id: string) {
-    return this.productService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+
+    const product = await this.productService.findOne(+id);
+
+    return {
+      ...product,
+      breadcrumbs: await this.categoryService.findCategoryPath(product.category.mId)
+    }
   }
 
   @Patch(':id')
