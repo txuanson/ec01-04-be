@@ -32,10 +32,9 @@ export class CartService {
     })
   }
 
-  async findOne(user: JwtPayload, id: number) {
+  async findOne(id: number) {
     return this.prisma.shoppingSession.findFirstOrThrow({
       where: {
-        mUserId: user?.id,
         mId: id
       },
       include: {
