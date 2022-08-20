@@ -1,6 +1,11 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 
+export enum UserRole {
+  USER = 'USER',
+  ADMIN = 'ADMIN'
+}
+
 const matchRoles = (roles: string[], userRoles: string) => {
   return roles.some(role => role === userRoles);
 };

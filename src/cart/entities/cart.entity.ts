@@ -7,8 +7,6 @@ export class ShoppingSession implements PrismaShoppingSession {
   @ApiProperty()
   mUserId: number;
   @ApiProperty()
-  mTotal: number;
-  @ApiProperty()
   mCreatedAt: Date;
   @ApiProperty()
   mModifiedAt: Date;
