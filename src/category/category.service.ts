@@ -37,7 +37,9 @@ export class CategoryService {
         }
       });
 
-      await this.prisma.category.updateMany({
+      console.log(parent)
+
+      const parentUpdate = await this.prisma.category.updateMany({
         data: {
           mRightNode: {
             increment: 2
@@ -45,11 +47,13 @@ export class CategoryService {
         },
         where: {
           mRightNode: {
-            gt: parent.mRightNode
+            gte: parent.mRightNode
           }
         }
       })
-
+      
+      console.log('parentUpdate: ', parentUpdate);
+      
       await this.prisma.category.updateMany({
         data: {
           mLeftNode: {
@@ -67,8 +71,8 @@ export class CategoryService {
         data: {
           mName: createCategoryDto.mName,
           mDesc: createCategoryDto.mDesc,
-          mLeftNode: parent.mRightNode + 1,
-          mRightNode: parent.mRightNode + 2,
+          mLeftNode: parent.mRightNode,
+          mRightNode: parent.mRightNode + 1,
           mParent: createCategoryDto.mParentCategoryId
         }
       })
