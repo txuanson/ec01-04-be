@@ -44,6 +44,7 @@ model Category {
   mCreateAt       DateTime   @default(now()) @map("m_create_at") @db.Timestamp(6)
   mModifiedAt     DateTime   @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   mParent         Int?       @map("m_parent")
+  mSlug           String?    @unique(map: "category_m_slug_uindex") @map("m_slug")
   parentCategory  Category?  @relation("categoryTocategory_m_parent", fields: [mParent], references: [mId], onDelete: Cascade, map: "category_category_m_id_fk")
   childCategories Category[] @relation("categoryTocategory_m_parent")
   product         Product[]  @relation("categoryToproduct")
@@ -74,6 +75,7 @@ model Manufacturer {
   mLogo       String?   @map("m_logo")
   mCreatedAt  DateTime  @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt DateTime  @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  mSlug       String?   @unique(map: "manufacturer_m_slug_uindex") @map("m_slug")
   product     Product[] @relation("manufacturerToproduct")
 
   @@map("manufacturer")
@@ -102,7 +104,7 @@ model OrderItem {
   mCreatedAt      DateTime       @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt     DateTime       @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   mSku            String         @unique(map: "order_item_m_sku_uindex") @map("m_sku")
-  m_price         Int            @default(0)
+  mPrice          Int            @default(0) @map("m_price")
   order           Order          @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_order_m_id_fk")
   product_variant ProductVariant @relation("order_itemToproduct_variant", fields: [mProductId, mSku], references: [mProductId, mSku], onDelete: NoAction, onUpdate: NoAction, map: "order_item_product_variant_m_product_id_m_sku_fk")
 
@@ -140,6 +142,7 @@ model Origin {
   mFlag       String?   @map("m_flag")
   mCreatedAt  DateTime  @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt DateTime  @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  mSlug       String?   @unique(map: "origin_m_slug_uindex") @map("m_slug")
   product     Product[]
 
   @@map("origin")
@@ -158,6 +161,7 @@ model Product {
   mRatingCount Int              @default(0) @map("m_rating_count")
   mAvgRating   Int              @default(5) @map("m_avg_rating")
   mStatus      String?          @default("HIDDEN") @map("m_status")
+  mSlug        String?          @map("m_slug")
   category     Category?        @relation("categoryToproduct", fields: [mCategoryId], references: [mId], onUpdate: SetNull, map: "product_category_m_id_fk")
   manufacturer Manufacturer?    @relation("manufacturerToproduct", fields: [mManuId], references: [mId], onUpdate: SetNull, map: "product_manufacturer_m_id_fk")
   origin       Origin?          @relation(fields: [mOriginId], references: [mId], onUpdate: SetNull, map: "product_origin_m_id_fk")

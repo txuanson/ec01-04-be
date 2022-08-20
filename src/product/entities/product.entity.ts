@@ -7,6 +7,8 @@ export class Product implements PrismaProduct {
   @ApiProperty()
   mName: string;
   @ApiProperty()
+  mSlug: string;
+  @ApiProperty()
   mDesc: string;
   @ApiProperty()
   mManuId: number;

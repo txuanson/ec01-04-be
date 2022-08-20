@@ -1,5 +1,6 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { slugify } from 'src/util/slugify';
 import { ProductStatus } from './constant/product-status.constant';
 import { ProductVariantStatus } from './constant/product-variant.constant';
 import { CreateProductDto } from './dto/create-product.dto';
@@ -13,16 +14,26 @@ export class ProductService {
   ) { }
 
   async create(createProductDto: CreateProductDto) {
-    return await this.prisma.product.create({
+    const newProduct = await this.prisma.product.create({
       data: {
         ...createProductDto
       }
-    })
+    });
+
+    const updateProduct = await this.prisma.product.update({
+      where: {
+        mId: newProduct.mId
+      },
+      data: {
+        mSlug: slugify(newProduct.mName) + '-' + newProduct.mId
+      }
+    });
+    return updateProduct;
   }
 
   async find(findProductDto: FindProductDto) {
     console.log(findProductDto)
-    return await this.prisma.product.findMany({
+    return this.prisma.product.findMany({
       where: {
         ...(findProductDto.mName ? {
           mName: {
@@ -33,15 +44,21 @@ export class ProductService {
         mStatus: {
           notIn: [ProductStatus.HIDDEN, ProductStatus.DELETED]
         },
-        mManuId: {
-          in: findProductDto.manufacturer
-        },
-        mCategoryId: {
-          in: findProductDto.category
-        },
-        mOriginId: {
-          in: findProductDto.origin
-        }
+        ...(findProductDto.category.length ? {
+          mCategoryId: {
+            in: findProductDto.category
+          }
+        } : {}),
+        ...(findProductDto.manufacturer.length ? {
+          mManuId: {
+            in: findProductDto.manufacturer
+          }
+        } : {}),
+        ...(findProductDto.origin.length ? {
+          mOriginId: {
+            in: findProductDto.origin
+          }
+        } : {})
       },
       select: {
         mId: true,
@@ -51,6 +68,7 @@ export class ProductService {
         mRatingCount: true,
         mAvgRating: true,
         mStatus: true,
+        mSlug: true,
         variant: {
           where: {
             mStatus: ProductVariantStatus.ACTIVE
@@ -84,7 +102,7 @@ export class ProductService {
   }
 
   async findOne(id: number) {
-    return await this.prisma.product.findFirstOrThrow({
+    return this.prisma.product.findFirstOrThrow({
       where: {
         mId: id,
         mStatus: {
@@ -99,6 +117,7 @@ export class ProductService {
         mRatingCount: true,
         mAvgRating: true,
         mStatus: true,
+        mSlug: true,
         variant: {
           where: {
             mStatus: {
@@ -142,7 +161,7 @@ export class ProductService {
   }
 
   async remove(id: number) {
-    return await this.prisma.product.updateMany({
+    return this.prisma.product.updateMany({
       where: {
         mId: id,
         mStatus: {
@@ -153,5 +172,20 @@ export class ProductService {
         mStatus: ProductStatus.DELETED
       }
     });
+  }
+
+  async updateSlug() {
+    const products = await this.prisma.product.findMany();
+
+    for (const product of products) {
+      await this.prisma.product.update({
+        where: {
+          mId: product.mId
+        },
+        data: {
+          mSlug: slugify(product.mName) + '-' + product.mId
+        }
+      })
+    }
   }
 }

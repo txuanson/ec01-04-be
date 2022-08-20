@@ -21,8 +21,8 @@ export class ManufacturerController {
   @Get()
   @ApiOperation({ summary: 'Get all manufacturers' })
   @ApiResponse({ status: 200, description: 'List of manufacturers', type: Array<Manufacturer> })
-  findAll() {
-    return this.manufacturerService.findAll();
+  async findAll() {
+    return await this.manufacturerService.findAll();
   }
 
   @Get(':id')

@@ -8,6 +8,8 @@ export class Category implements PrismaCategory {
   @ApiProperty()
   mName: string;
   @ApiProperty()
+  mSlug: string;
+  @ApiProperty()
   mDesc: string;
   @ApiProperty()
   mCreateAt: Date;
@@ -15,7 +17,7 @@ export class Category implements PrismaCategory {
   mModifiedAt: Date;
   @ApiProperty()
   mParent: number;
-  
+
   @Exclude()
   mRightNode: number;
   @Exclude()

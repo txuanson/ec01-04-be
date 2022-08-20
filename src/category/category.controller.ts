@@ -7,27 +7,34 @@ import { Category } from './entities/category.entity';
 
 @Controller('category')
 export class CategoryController {
-  constructor(private readonly categoryService: CategoryService) {}
+  constructor(private readonly categoryService: CategoryService) { }
 
   @Post()
   @ApiOperation({ summary: 'Create new category' })
   @ApiResponse({ status: 201, description: 'New category created', type: Category })
-  @ApiResponse({ status: 400, description: 'Bad request'})
+  @ApiResponse({ status: 400, description: 'Bad request' })
   @HttpCode(201)
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoryService.create(createCategoryDto);
+  async create(@Body() createCategoryDto: CreateCategoryDto) {
+    return await this.categoryService.create(createCategoryDto);
   }
 
   @Get()
   @ApiOperation({ summary: 'Get all root categories' })
   @ApiResponse({ status: 200, description: 'List of roots categories', type: Array<Category> })
-  findAll() {
-    return this.categoryService.findAll();
+  async findAll() {
+    return await this.categoryService.findAll();
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.categoryService.findOne(+id);
+  async findOne(@Param('id') id: string) {
+    return await this.categoryService.findOne(+id);
+  }
+
+  @Get(':id/path')
+  @ApiOperation({ summary: 'Get path of category' })
+  @ApiResponse({ status: 200, description: 'Path of category', type: Array<Category> })
+  async getCategoryPath(@Param('id') id: string) {
+    return await this.categoryService.findCategoryPath(+id);
   }
 
   @Patch(':id')

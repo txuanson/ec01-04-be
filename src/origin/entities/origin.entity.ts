@@ -9,6 +9,8 @@ export class Origin implements PrismaOrigin {
   @ApiProperty()
   mFlag: string;
   @ApiProperty()
+  mSlug: string;
+  @ApiProperty()
   mCreatedAt: Date;
   @ApiProperty()
   mModifiedAt: Date;
