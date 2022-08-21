@@ -42,10 +42,26 @@ export class CartController {
     }
   }
 
-  @Patch(':id/claim')
+  @Patch(':id/migrate')
   @ApiBearerAuth()
-  async claimShoppingSession(@User() user: JwtPayload, @Param('id') id: string) {
+  async migrateShoppingSession(@User() user: JwtPayload, @Param('id') id: string, @Headers('Session-Key') headers: string) {
+    let userSession = await this.cartService.findSessionByUserId(user.id);
+    if (!userSession) {
+      userSession = await this.cartService.create(user);
+    }
 
+    const foundSession = await this.cartService.findOne(+id);
+    if (this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers) === false
+      || foundSession.mUserId != null) {
+      throw new ForbiddenException('You are not allowed to access this resource');
+    }
+
+    await this.cartService.migrateSession(foundSession.mId, userSession.mId);
+    return {
+      code: 'MIGRATE_SHOPPING_SESSION:SESSION_MIGRATED',
+      data: userSession,
+      token: this.cryptService.sign({ mId: userSession.mId, mUserId: userSession.mUserId })
+    }
   }
 
   @Get(':id')
@@ -53,7 +69,7 @@ export class CartController {
   async findOne(@User() user: JwtPayload, @Param('id') id: string, @Headers('Session-Key') headers: string) {
     const foundSession = await this.cartService.findOne(+id);
     if (this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers) === false
-      || (user && foundSession.mUserId !== user.id)) {
+      || (user && foundSession.mUserId !== user.id) || (!user && foundSession.mUserId !== null)) {
       throw new ForbiddenException('You are not allowed to access this resource');
     }
     return foundSession;
@@ -64,7 +80,7 @@ export class CartController {
   async update(@User() user: JwtPayload, @Param('id') id: string, @Body() updateCartDto: UpdateCartDto, @Headers('Session-Key') headers: string) {
     const foundSession = await this.cartService.findOne(+id);
     if (this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers) === false
-      || (user && foundSession.mUserId !== user.id)) {
+      || (user && foundSession.mUserId !== user.id) || (!user && foundSession.mUserId !== null)) {
       throw new ForbiddenException('You are not allowed to access this resource');
     }
     await this.cartService.update(+id, updateCartDto);
