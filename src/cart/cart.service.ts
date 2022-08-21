@@ -13,12 +13,61 @@ export class CartService {
     return this.prisma.shoppingSession.create({
       data: {
         mUserId: user?.id
+      },
+      include: {
+        cartItem: true
       }
     });
   }
 
-  findAll() {
-    return `This action returns all cart`;
+  async migrateSession(fromSessionId: number, toSessionId: number) {
+    return this.prisma.$transaction(async () => {
+      const session = await this.prisma.cartItem.findMany(
+        {
+          where: {
+            mSessionId: fromSessionId
+          }
+        }
+      );
+
+      await Promise.all(session.map(async (item) =>
+        this.prisma.cartItem.upsert({
+          create: {
+            mSessionId: toSessionId,
+            mProductId: item.mProductId,
+            mSku: item.mSku,
+            mQuantity: item.mQuantity
+          },
+          update: {
+            mQuantity: {
+              increment: item.mQuantity
+            }
+          },
+          where: {
+            mSessionId_mProductId_mSku: {
+              mSessionId: toSessionId,
+              mProductId: item.mProductId,
+              mSku: item.mSku
+            }
+          }
+        })
+      ));
+
+      await this.prisma.shoppingSession.delete({
+        where: {
+          mId: fromSessionId
+        }
+      });
+
+      return await this.prisma.shoppingSession.findFirstOrThrow({
+        where: {
+          mId: toSessionId
+        },
+        include: {
+          cartItem: true
+        }
+      });
+    })
   }
 
   async findSessionByUserId(userId: number) {

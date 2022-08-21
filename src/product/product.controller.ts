@@ -3,7 +3,7 @@ import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FindProductDto } from './dto/find-product.dto';
-import { ApiBadRequestResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiOperation, ApiResponse, IntersectionType } from '@nestjs/swagger';
 import { Product } from './entities/product.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
@@ -46,7 +46,7 @@ export class ProductController {
 
     return {
       ...product,
-      breadcrumbs: await this.categoryService.findCategoryPath(product.category.mId)
+      breadcrumbs: [...await this.categoryService.findCategoryPath(product.category.mId), { mId: 0, mName: product.mName, mSlug: product.mSlug }],
     }
   }
 

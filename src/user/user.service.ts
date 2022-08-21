@@ -42,7 +42,7 @@ export class UserService {
   }
 
   async findById(userId: number): Promise<Omit<UserEntity, 'mPassword' | 'mCreatedAt' | 'mModifiedAt'>> {
-    return await this.prisma.user.findUniqueOrThrow({
+    return this.prisma.user.findUniqueOrThrow({
       where: {
         mId: userId
       },

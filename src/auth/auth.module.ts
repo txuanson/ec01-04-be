@@ -7,6 +7,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { readFileSync } from 'fs';
 
 @Module({
   imports: [
@@ -14,10 +15,14 @@ import { LocalStrategy } from './strategies/local.strategy';
     PassportModule.register({ defaultStrategy: 'jwt' }),
     JwtModule.registerAsync({
       imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
+      useFactory: (configService: ConfigService) => ({
+        // privateKey: readFileSync(configService.get('CRYPT_PRIVATE_KEY'), 'utf8'),
+        // publicKey: readFileSync(configService.get('CRYPT_PUBLIC_KEY'), 'utf8'),
+        privateKey: configService.get('HEROKU_PRIVATE_KEY'),
+        publicKey: configService.get('HEROKU_PUBLIC_KEY'),
         signOptions: {
-          expiresIn: configService.get('JWT_EXPIRE')
+          expiresIn: configService.get('JWT_EXPIRE'),
+          algorithm: 'RS256'
         }
       }),
       inject: [ConfigService]

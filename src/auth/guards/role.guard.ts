@@ -1,12 +1,13 @@
 import { Injectable, CanActivate, ExecutionContext } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { JwtPayload } from '../types/jwt-payload.type';
 
 export enum UserRole {
   USER = 'USER',
   ADMIN = 'ADMIN'
 }
 
-const matchRoles = (roles: string[], userRoles: string) => {
+const matchRoles = (roles: UserRole[], userRoles: string) => {
   return roles.some(role => role === userRoles);
 };
 
@@ -15,12 +16,12 @@ export class RolesGuard implements CanActivate {
   constructor(private reflector: Reflector) { }
 
   canActivate(context: ExecutionContext): boolean {
-    const roles = this.reflector.get<string[]>('roles', context.getHandler());
+    const roles = this.reflector.get<UserRole[]>('roles', context.getHandler());
     if (!roles) {
       return true;
     }
     const req = context.switchToHttp().getRequest() as any;
-    const user = req.user;
+    const user = req.user as JwtPayload;
     return matchRoles(roles, user.role);
   }
 }
