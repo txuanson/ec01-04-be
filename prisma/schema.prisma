@@ -83,14 +83,15 @@ model Manufacturer {
 
 model Order {
   mId                 Int                   @id(map: "order_pk") @default(autoincrement()) @map("m_id")
-  mUserId             Int                   @map("m_user_id")
-  mPaymentId          Int                   @map("m_payment_id")
+  mUserId             Int?                  @map("m_user_id")
   mStatus             String                @map("m_status") @db.VarChar(50)
   mCreatedAt          DateTime              @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt         DateTime              @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
   mAddress            String                @map("m_address")
-  user                User                  @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
-  orderItems          OrderItem[]
+  mPhone              String                @map("m_phone")
+  mUserName           String                @map("m_user_name")
+  user                User?                 @relation(fields: [mUserId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_user_m_id_fk")
+  orderItem           OrderItem[]
   orderPayment        OrderPayment?
   orderShippingStatus OrderShippingStatus[]
 
@@ -256,7 +257,6 @@ model ProductVariant {
   mVariantValue    String            @map("m_variant_value")
   mPrice           Int               @default(0) @map("m_price")
   mVariantType     String            @map("m_variant_type")
-  mStock           Int               @default(0) @map("m_stock")
   mStatus          String?           @default("ACTIVE") @map("m_status")
   mCreatedAt       DateTime?         @default(now()) @map("m_created_at") @db.Timestamp(6)
   mModifiedAt      DateTime?         @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
@@ -267,6 +267,5 @@ model ProductVariant {
   user_rating      UserRating[]      @relation("product_variantTouser_rating")
 
   @@id([mProductId, mSku], map: "product_variant_pk")
-  @@index([mStock], map: "product_variant_m_stock_index")
   @@map("product_variant")
 }

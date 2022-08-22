@@ -1,6 +1,6 @@
 import { PrismaService } from "@/prisma/prisma.service";
 import { Injectable } from "@nestjs/common";
-import { ProductVariantStatus } from "./constant/product-variant.constant";
+import { ProductStatus } from "./constant/product-status.constant";
 import { CreateProductVariantDto } from "./dto/create-product-variant.dto";
 import { UpdateProductVariantDto } from "./dto/update-product-variant.dto";
 
@@ -19,7 +19,7 @@ export class ProductVariantService {
     })
   }
 
-  async findAllVariantOfProduct(productId: number) { 
+  async findAllVariantOfProduct(productId: number) {
     return await this.prisma.productVariant.findMany({
       where: {
         mProductId: productId
@@ -33,11 +33,34 @@ export class ProductVariantService {
         mProductId: productId,
         mSku: sku,
         mStatus: {
-          not: ProductVariantStatus.DELETED
+          not: ProductStatus.DELETED
         }
       },
       data: {
         ...updateProductVariantDto
+      }
+    })
+  }
+
+  async findManyBySkus(skus: string[]) {
+    return this.prisma.productVariant.findMany({
+      where: {
+        mSku: {
+          in: skus
+        },
+        mStatus: {
+          notIn: [ProductStatus.DELETED, ProductStatus.HIDDEN, ProductStatus.OUT_OF_STOCK]
+        }
+      },
+      select: {
+        mStatus: true,
+        mPrice: true,
+        mSku: true,
+        product: {
+          select: {
+            mName: true,
+          }
+        }
       }
     })
   }
@@ -51,7 +74,7 @@ export class ProductVariantService {
         }
       },
       data: {
-        mStatus: ProductVariantStatus.DELETED
+        mStatus: ProductStatus.DELETED
       }
     })
   }

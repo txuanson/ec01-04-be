@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { Product as PrismaProduct } from "@prisma/client";
+import { ProductStatus } from "../constant/product-status.constant";
 
 export class Product implements PrismaProduct {
   @ApiProperty()
@@ -27,5 +28,5 @@ export class Product implements PrismaProduct {
   @ApiProperty()
   mAvgRating: number;
   @ApiProperty()
-  mStatus: string;
+  mStatus: ProductStatus;
 }
