@@ -1,5 +1,6 @@
 import { ApiProperty } from "@nestjs/swagger";
 import { ProductVariant as PrismaProductVariant } from "@prisma/client";
+import { ProductStatus } from "../constant/product-status.constant";
 
 export class ProductVariant implements PrismaProductVariant {
   @ApiProperty()
@@ -13,10 +14,10 @@ export class ProductVariant implements PrismaProductVariant {
   @ApiProperty()
   mVariantType: string;
   @ApiProperty()
-  mStock: number;
-  @ApiProperty()
-  mStatus: string;
+  mStatus: ProductStatus;
 
+  @ApiProperty()
   mCreatedAt: Date;
+  @ApiProperty()
   mModifiedAt: Date;
 }

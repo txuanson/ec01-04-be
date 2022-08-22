@@ -1,7 +1,8 @@
 import { ApiProperty } from "@nestjs/swagger";
-import { IsOptional, IsString } from "class-validator";
+import { IsEnum, IsOptional, IsString } from "class-validator";
+import { ProductStatus } from "../constant/product-status.constant";
 
-export class  CreateProductVariantDto {
+export class CreateProductVariantDto {
   @ApiProperty()
   mSku: string;
   @ApiProperty()
@@ -11,9 +12,7 @@ export class  CreateProductVariantDto {
   @ApiProperty()
   mVariantType: string;
   @ApiProperty()
-  mStock: number;
-  @ApiProperty()
   @IsOptional()
-  @IsString()
-  mStatus?: string
+  @IsEnum(ProductStatus)
+  mStatus?: ProductStatus = ProductStatus.HIDDEN;
 }

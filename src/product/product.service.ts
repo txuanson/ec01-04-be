@@ -2,7 +2,6 @@ import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 import { slugify } from 'src/util/slugify';
 import { ProductStatus } from './constant/product-status.constant';
-import { ProductVariantStatus } from './constant/product-variant.constant';
 import { CreateProductDto } from './dto/create-product.dto';
 import { FindProductDto } from './dto/find-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
@@ -71,7 +70,7 @@ export class ProductService {
         mSlug: true,
         variant: {
           where: {
-            mStatus: ProductVariantStatus.ACTIVE
+            mStatus: ProductStatus.IN_STOCK
           }
         },
         origin: {
@@ -121,7 +120,7 @@ export class ProductService {
         variant: {
           where: {
             mStatus: {
-              not: ProductVariantStatus.DELETED
+              not: ProductStatus.DELETED
             }
           }
         },
