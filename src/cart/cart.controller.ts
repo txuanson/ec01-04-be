@@ -2,7 +2,7 @@ import { User } from '@/auth/decorator/get-user.decorator';
 import { Roles } from '@/auth/decorator/role.decorator';
 import { RolesGuard, UserRole } from '@/auth/guards/role.guard';
 import { JwtPayload } from '@/auth/types/jwt-payload.type';
-import { Controller, Get, Headers, Body, Patch, Param, ForbiddenException, UseGuards, Post, BadRequestException } from '@nestjs/common';
+import { Controller, Get, Headers, Body, Patch, Param, ForbiddenException, UseGuards, Post, BadRequestException, Query } from '@nestjs/common';
 import { ApiBearerAuth } from '@nestjs/swagger';
 import { CryptService } from 'src/crypt/crypt.service';
 import { OrderService } from 'src/order/order.service';
@@ -142,10 +142,10 @@ export class CartController {
 
   @Get(':id')
   @ApiBearerAuth()
-  async findOne(@User() user: JwtPayload, @Param('id') id: string, @Headers('Session-Key') headers: string) {
-    const foundSession = await this.cartService.findOne(+id);
+  async findOne(@User() user: JwtPayload, @Param('id') id: string, @Query('ssid') ssid: string) {
+    const foundSession = await this.cartService.findOne(+id, true);
     if (
-      (!user && foundSession.mUserId !== null && this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers) === false)
+      (!user && foundSession.mUserId !== null && this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, ssid) === false)
       || (user && foundSession.mUserId !== user.id)
     ) {
       throw new ForbiddenException('You are not allowed to access this resource');

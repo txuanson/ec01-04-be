@@ -81,15 +81,36 @@ export class CartService {
     })
   }
 
-  async findOne(id: number) {
+  async findOne(id: number, extended: boolean = false) {
     return this.prisma.shoppingSession.findFirstOrThrow({
       where: {
         mId: id
       },
       include: {
-        cartItem: true
+        cartItem: {
+          select: {
+            mProductId: true,
+            mSku: true,
+            mQuantity: true,
+            ...(extended ? {
+              productVariant: {
+                select: {
+                  mPrice: true,
+                  mVariantType: true,
+                  mVariantValue: true,
+                  product: {
+                    select: {
+                      mName: true,
+                      mPhotos: true,
+                    }
+                  }
+                }
+              }
+            } : {})
+          }
+        }
       }
-    })
+    });
   }
 
   async update(id: number, updateCartDto: UpdateCartDto) {
