@@ -18,7 +18,7 @@ export class ZaloPayService implements IPaymentService {
 
   async createPaymentOrder(orderId: number, createPaymentDto: CreatePaymentDto): Promise<string> {
     const embedData = JSON.stringify({
-      redirecturl: this.configService.getOrThrow("ZALO_PAY_REDIRECT_URL"),
+      redirecturl: this.configService.getOrThrow("ZALO_PAY_REDIRECT_URL") + '/order/' + orderId,
       orderId
     });
 
@@ -43,7 +43,6 @@ export class ZaloPayService implements IPaymentService {
       ...payload
     })
 
-    console.log(data);
     return data.data.order_url;
   }
   updatePaymentOrder(orderId: number, updatePaymentDto: UpdatePaymentDto): Promise<void> {
