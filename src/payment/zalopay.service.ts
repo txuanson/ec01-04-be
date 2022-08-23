@@ -16,9 +16,9 @@ export class ZaloPayService implements IPaymentService {
     private readonly configService: ConfigService,
   ) { }
 
-  async createPaymentOrder(orderId: number, createPaymentDto: CreatePaymentDto): Promise<string> {
+  async createPaymentOrder(orderId: number, createPaymentDto: CreatePaymentDto, ssid: string): Promise<string> {
     const embedData = JSON.stringify({
-      redirecturl: this.configService.getOrThrow("ZALO_PAY_REDIRECT_URL") + '/order/' + orderId,
+      redirecturl: this.configService.getOrThrow("ZALO_PAY_REDIRECT_URL") + '/order/' + orderId + '?ssid=' + ssid,
       orderId
     });
 
