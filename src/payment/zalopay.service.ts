@@ -6,19 +6,26 @@ import { vi } from "date-fns/locale";
 import crypto from 'crypto';
 import { CreatePaymentDto } from "./dto/create-payment.dto";
 import { UpdatePaymentDto } from "./dto/update-payment.dto";
-import { IPaymentService } from "./types/payment.type";
+import { IPaymentService, PaymentStatus } from "./types/payment.type";
 import { HttpService } from "@nestjs/axios";
+import { OrderService } from "src/order/order.service";
+import { OrderStatus } from "src/order/constant/order-status.enum";
+import { CryptService } from "src/crypt/crypt.service";
 
 @Injectable()
 export class ZaloPayService implements IPaymentService {
   constructor(
+    private readonly prisma: PrismaService,
     private readonly httpService: HttpService,
     private readonly configService: ConfigService,
+    private readonly orderService: OrderService,
+    private readonly cryptService: CryptService,
   ) { }
 
   async createPaymentOrder(orderId: number, createPaymentDto: CreatePaymentDto, ssid: string): Promise<string> {
+    console.log(ssid)
     const embedData = JSON.stringify({
-      redirecturl: this.configService.getOrThrow("ZALO_PAY_REDIRECT_URL") + '/order/' + orderId + '?ssid=' + ssid,
+      redirecturl: this.configService.getOrThrow("FRONT_END_URI") + '/order/' + orderId + '/thank-you?ssid=' + ssid,
       orderId
     });
 
@@ -34,7 +41,8 @@ export class ZaloPayService implements IPaymentService {
       item: JSON.stringify(createPaymentDto.items),
       description: `EC04-01 Zalopay - #${orderId}`,
       embed_data: embedData,
-      callback_url: this.configService.getOrThrow('ZALO_PAY_HOOK_URI'),
+      bank_code: '',
+      callback_url: this.configService.getOrThrow('PAYMENT_HOOK_URI') + '/zalo-pay',
     };
 
     payload['mac'] = this.createSignature(payload);
@@ -45,8 +53,41 @@ export class ZaloPayService implements IPaymentService {
 
     return data.data.order_url;
   }
-  updatePaymentOrder(orderId: number, updatePaymentDto: UpdatePaymentDto): Promise<void> {
-    throw new Error("Method not implemented.");
+
+  async processCallback(payload: any): Promise<any> {
+    if (!this.verifySignature(payload.mac, payload.data)) {
+      return {
+        return_code: 2,
+        return_message: 'Signature invalid!'
+      }
+    }
+
+    try {
+      const data = JSON.parse(payload.data);
+      const embed_data = JSON.parse(data.embed_data);
+      const orderId = embed_data.orderId;
+
+      await Promise.all([
+        this.orderService.updateOrderStatus(orderId, OrderStatus.PROCESSING),
+        this.prisma.orderPayment.update({
+          where: { mOrderId: orderId },
+          data: {
+            mStatus: PaymentStatus.SUCCEEDED
+          },
+        })
+      ])
+
+      return {
+        return_code: 1,
+        return_message: 'Success!'
+      }
+    } catch (error) {
+      console.error(error);
+      return {
+        return_code: -1,
+        return_message: 'Something went wrong!'
+      }
+    }
   }
 
   createSignature(data: any): string {

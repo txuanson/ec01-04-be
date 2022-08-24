@@ -7,7 +7,7 @@ import { ApiBearerAuth } from '@nestjs/swagger';
 import { CryptService } from 'src/crypt/crypt.service';
 import { OrderService } from 'src/order/order.service';
 import { PaymentService } from 'src/payment/payment.service';
-import { PaymentStatus } from 'src/payment/types/payment.type';
+import { PaymentProvider, PaymentStatus } from 'src/payment/types/payment.type';
 import { ProductVariantService } from 'src/product/product-variant.service';
 import { CartService } from './cart.service';
 import { CheckoutCartDto } from './dto/check-out.dto';
@@ -56,9 +56,13 @@ export class CartController {
   @ApiBearerAuth()
   async checkOut(@User() user: JwtPayload, @Param('id') id: string, @Headers('Session-Key') headers: string, @Body() checkOutCartDto: CheckoutCartDto) {
     const foundSession = await this.cartService.findOne(+id);
+
+    const verify = this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers);
+
     if (
-      (!user && foundSession.mUserId !== null && this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers) === false)
-      || (user && foundSession.mUserId !== user.id)
+      (!user && verify === false)
+      ||
+      (user && ((foundSession.mUserId !== null && foundSession.mUserId !== user.id) || (foundSession.mUserId === null && verify === false)))
     ) {
       throw new ForbiddenException('You are not allowed to access this resource');
     }
@@ -97,14 +101,13 @@ export class CartController {
       }
     });
 
-    const paymentInstance = this.paymentService.getInstance(checkOutCartDto.mProvider);
+    const paymentInstance = this.paymentService.getInstance(PaymentProvider.ZALO_PAY);
 
     const paymentInfo = await paymentInstance.createPaymentOrder(order.mId, {
-      mAmount: totalPrice,
-      mProvider: checkOutCartDto.mProvider,
+      mAmount: 10000,
       mStatus: PaymentStatus.PENDING,
-      items: orderItems,
-    }, headers);
+      items: [],
+    }, this.cryptService.sign({ orderId: order.mId }));
 
     await this.cartService.remove(+id);
 
@@ -157,12 +160,17 @@ export class CartController {
   @ApiBearerAuth()
   async update(@User() user: JwtPayload, @Param('id') id: string, @Body() updateCartDto: UpdateCartDto, @Headers('Session-Key') headers: string) {
     const foundSession = await this.cartService.findOne(+id);
+    
+    const verify = this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers);
+
     if (
-      (!user && foundSession.mUserId !== null && this.cryptService.verify({ mId: foundSession.mId, mUserId: foundSession.mUserId }, headers) === false)
-      || (user && foundSession.mUserId !== user.id)
+      (!user && verify === false)
+      ||
+      (user && ((foundSession.mUserId !== null && foundSession.mUserId !== user.id) || (foundSession.mUserId === null && verify === false)))
     ) {
       throw new ForbiddenException('You are not allowed to access this resource');
     }
+
     await this.cartService.update(+id, updateCartDto);
     return {
       code: `UPDATE_SHOPPING_SESSION:${updateCartDto.operation}_ITEM`

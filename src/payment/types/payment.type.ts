@@ -18,7 +18,7 @@ export enum PaymentProvider {
 
 export interface IPaymentService {
   createPaymentOrder(orderId: number, createPaymentDto: CreatePaymentDto, ssid: string): Promise<string>;
-  updatePaymentOrder(orderId: number, updatePaymentDto: UpdatePaymentDto): Promise<void>;
+  processCallback(payload: any): Promise<any>;
 
   createSignature(data: any): string;
   verifySignature(signature: string, data: any): boolean;

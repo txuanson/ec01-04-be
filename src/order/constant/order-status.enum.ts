@@ -3,4 +3,5 @@ export enum OrderStatus {
   PROCESSING = 'PROCESSING',
   IN_DELIVERY = 'IN_DELIVERY',
   DELIVERED = 'DELIVERED',
+  CANCELED = 'CANCELED',
 }

@@ -1,9 +1,9 @@
 import { PrismaService } from '@/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
+import { CryptService } from 'src/crypt/crypt.service';
 import { PaymentStatus } from 'src/payment/types/payment.type';
 import { OrderStatus } from './constant/order-status.enum';
 import { CreateOrderDto } from './dto/create-order.dto';
-import { UpdateOrderDto } from './dto/update-order.dto';
 
 @Injectable()
 export class OrderService {
@@ -35,19 +35,47 @@ export class OrderService {
     });
   }
 
-  findAll() {
+  async findAll() {
     return `This action returns all order`;
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  async findOne(id: number) {
+    return await this.prisma.order.findUniqueOrThrow({
+      where: { mId: id },
+      select: {
+        mId: true,
+        mUserId: true,
+        mStatus: true,
+        mAddress: true,
+        mPhone: true,
+        mUserName: true,
+        orderItem: {
+          select: {
+            mPrice: true,
+            mQuantity: true,
+            productVariant: {
+              select: {
+                mVariantType: true,
+                mVariantValue: true,
+                product: {
+                  select: {
+                    mName: true,
+                    mPhotos: true,
+                    mSlug: true
+                  }
+                }
+              },
+            }
+          }
+        }
+      }
+    });
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  async updateOrderStatus(id: number, mStatus: OrderStatus) {
+    return this.prisma.order.update({
+      where: { mId: id },
+      data: { mStatus }
+    });
   }
 }
