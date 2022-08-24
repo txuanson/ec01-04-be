@@ -19,8 +19,8 @@ export class CategoryController {
   }
 
   @Get()
-  @ApiOperation({ summary: 'Get all root categories' })
-  @ApiResponse({ status: 200, description: 'List of roots categories', type: Array<Category> })
+  @ApiOperation({ summary: 'Get all categories with depth' })
+  @ApiResponse({ status: 200, description: 'List of all categories, sorted by left node (means parent are always on top of its children)', type: Array<Category> })
   async findAll() {
     return await this.categoryService.findAll();
   }

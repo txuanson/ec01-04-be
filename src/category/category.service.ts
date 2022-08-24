@@ -82,6 +82,7 @@ export class CategoryService {
           mLeftNode: parent.mRightNode,
           mRightNode: parent.mRightNode + 1,
           mParent: createCategoryDto.mParentCategoryId,
+          mDepth: parent.mDepth + 1,
         }
       })
 
@@ -100,19 +101,16 @@ export class CategoryService {
 
   async findAll() {
     return this.prisma.category.findMany({
-      where: {
-        mParent: null
-      },
+      where: {},
       select: {
         mId: true,
         mName: true,
         mDesc: true,
-        childCategories: {
-          select: {
-            mId: true,
-            mName: true,
-          }
-        },
+        mDepth: true,
+        mParent: true
+      },
+      orderBy: {
+        mLeftNode: 'asc'
       }
     })
   }
@@ -126,6 +124,8 @@ export class CategoryService {
         mId: true,
         mName: true,
         mDesc: true,
+        mDepth: true,
+        mParent: true,
         childCategories: {
           select: {
             mId: true,
