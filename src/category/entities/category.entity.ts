@@ -12,6 +12,8 @@ export class Category implements PrismaCategory {
   @ApiProperty()
   mDesc: string;
   @ApiProperty()
+  mDepth: number;
+  @ApiProperty()
   mCreateAt: Date;
   @ApiProperty()
   mModifiedAt: Date;
