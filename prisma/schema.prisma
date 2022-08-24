@@ -99,15 +99,15 @@ model Order {
 }
 
 model OrderItem {
-  mOrderId        Int            @map("m_order_id")
-  mProductId      Int            @map("m_product_id")
-  mQuantity       Int            @default(1) @map("m_quantity")
-  mCreatedAt      DateTime       @default(now()) @map("m_created_at") @db.Timestamp(6)
-  mModifiedAt     DateTime       @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
-  mSku            String         @unique(map: "order_item_m_sku_uindex") @map("m_sku")
-  mPrice          Int            @default(0) @map("m_price")
-  order           Order          @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_order_m_id_fk")
-  product_variant ProductVariant @relation("order_itemToproduct_variant", fields: [mProductId, mSku], references: [mProductId, mSku], onDelete: NoAction, onUpdate: NoAction, map: "order_item_product_variant_m_product_id_m_sku_fk")
+  mOrderId       Int            @map("m_order_id")
+  mProductId     Int            @map("m_product_id")
+  mQuantity      Int            @default(1) @map("m_quantity")
+  mCreatedAt     DateTime       @default(now()) @map("m_created_at") @db.Timestamp(6)
+  mModifiedAt    DateTime       @default(now()) @updatedAt @map("m_modified_at") @db.Timestamp(6)
+  mSku           String         @unique(map: "order_item_m_sku_uindex") @map("m_sku")
+  mPrice         Int            @default(0) @map("m_price")
+  order          Order          @relation(fields: [mOrderId], references: [mId], onDelete: NoAction, onUpdate: NoAction, map: "order_item_order_m_id_fk")
+  productVariant ProductVariant @relation("order_itemToproduct_variant", fields: [mProductId, mSku], references: [mProductId, mSku], onDelete: NoAction, onUpdate: NoAction, map: "order_item_product_variant_m_product_id_m_sku_fk")
 
   @@id([mOrderId, mProductId, mSku], map: "order_item_pk")
   @@map("order_item")

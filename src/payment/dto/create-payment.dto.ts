@@ -2,10 +2,6 @@ import { IsArray, IsEnum, IsInt, IsNotEmpty, IsOptional, IsString } from "class-
 import { PaymentProvider, PaymentStatus } from "../types/payment.type";
 
 export class CreatePaymentDto {
-  @IsNotEmpty()
-  @IsString()
-  @IsEnum(PaymentProvider)
-  mProvider: PaymentProvider;
 
   @IsNotEmpty()
   @IsOptional()
