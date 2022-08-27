@@ -78,17 +78,20 @@ export class ProductService {
             mId: true,
             mCountry: true,
             mFlag: true,
+            mSlug: true,
           }
         },
         category: {
           select: {
             mId: true,
             mName: true,
+            mSlug: true,
           }
         },
         manufacturer: {
           select: {
             mId: true,
+            mSlug: true,
             mName: true,
             mLogo: true
           }
@@ -127,12 +130,14 @@ export class ProductService {
         origin: {
           select: {
             mId: true,
+            mSlug: true,
             mCountry: true,
             mFlag: true,
           }
         },
         category: {
           select: {
+            mSlug: true,
             mId: true,
             mName: true,
           }
@@ -140,6 +145,7 @@ export class ProductService {
         manufacturer: {
           select: {
             mId: true,
+            mSlug: true,
             mName: true,
             mLogo: true
           }
