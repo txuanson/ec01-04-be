@@ -30,6 +30,13 @@ export class UserController {
     return await this.userSerivce.findById(user.id)
   }
 
+  @Get()
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Get all users' })
+  async findAll(): Promise<UserEntity[]> {
+    return await this.userSerivce.findAll();
+  }
+
   @Get('address')
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user addresses' })
