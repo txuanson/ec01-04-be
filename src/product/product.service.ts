@@ -32,6 +32,11 @@ export class ProductService {
 
   async findAll(): Promise<any[]> {
     return this.prisma.product.findMany({
+      where: {
+        mStatus: {
+          not: ProductStatus.DELETED
+        }
+      },
       include: {
         category: true,
         manufacturer: true,
