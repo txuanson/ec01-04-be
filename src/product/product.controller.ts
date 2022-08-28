@@ -29,11 +29,15 @@ export class ProductController {
 
   @Post('/search')
   @ApiOperation({ summary: 'Search for product' })
-  @ApiResponse({ status: 200, description: 'List of products found', type: Array<Product> })
+  @ApiResponse({ status: 200, description: 'List of products found' })
   @ApiBadRequestResponse({ description: 'Bad request' })
   @HttpCode(200)
   async find(@Body() findProductDto: FindProductDto) {
-    return this.productService.find(findProductDto);
+    const [results, count] = await this.productService.find(findProductDto);
+    return {
+      data: results,
+      count,
+    }
   }
 
   @Get(':id')

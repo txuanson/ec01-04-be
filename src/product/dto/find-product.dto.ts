@@ -20,7 +20,7 @@ export class FindProductDto {
   @IsOptional()
   @IsArray()
   @IsNumber({}, { each: true })
-  readonly category?: number[];
+  readonly category?: number[] = [];
 
 
   @ApiProperty({

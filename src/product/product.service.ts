@@ -31,76 +31,81 @@ export class ProductService {
   }
 
   async find(findProductDto: FindProductDto) {
-    console.log(findProductDto)
-    return this.prisma.product.findMany({
-      where: {
-        ...(findProductDto.mName ? {
-          mName: {
-            search: findProductDto.mName
-          }
-        } : {})
-        ,
-        mStatus: {
-          notIn: [ProductStatus.HIDDEN, ProductStatus.DELETED]
-        },
-        ...(findProductDto.category.length ? {
-          mCategoryId: {
-            in: findProductDto.category
-          }
-        } : {}),
-        ...(findProductDto.manufacturer.length ? {
-          mManuId: {
-            in: findProductDto.manufacturer
-          }
-        } : {}),
-        ...(findProductDto.origin.length ? {
-          mOriginId: {
-            in: findProductDto.origin
-          }
-        } : {})
-      },
-      select: {
-        mId: true,
-        mName: true,
-        mDesc: true,
-        mPhotos: true,
-        mRatingCount: true,
-        mAvgRating: true,
-        mStatus: true,
-        mSlug: true,
-        variant: {
-          where: {
-            mStatus: ProductStatus.IN_STOCK
-          }
-        },
-        origin: {
-          select: {
-            mId: true,
-            mCountry: true,
-            mFlag: true,
-            mSlug: true,
-          }
-        },
-        category: {
-          select: {
-            mId: true,
-            mName: true,
-            mSlug: true,
-          }
-        },
-        manufacturer: {
-          select: {
-            mId: true,
-            mSlug: true,
-            mName: true,
-            mLogo: true
-          }
+    const where = {
+      ...(findProductDto.mName ? {
+        mName: {
+          search: findProductDto.mName
         }
+      } : {})
+      ,
+      mStatus: {
+        notIn: [ProductStatus.HIDDEN, ProductStatus.DELETED]
       },
-      orderBy: findProductDto.sort,
-      skip: findProductDto.skip,
-      take: findProductDto.pageSize
-    });
+      ...(findProductDto.category.length ? {
+        mCategoryId: {
+          in: findProductDto.category
+        }
+      } : {}),
+      ...(findProductDto.manufacturer.length ? {
+        mManuId: {
+          in: findProductDto.manufacturer
+        }
+      } : {}),
+      ...(findProductDto.origin.length ? {
+        mOriginId: {
+          in: findProductDto.origin
+        }
+      } : {})
+    };
+    return this.prisma.$transaction([
+      this.prisma.product.findMany({
+        where,
+        select: {
+          mId: true,
+          mName: true,
+          mDesc: true,
+          mPhotos: true,
+          mRatingCount: true,
+          mAvgRating: true,
+          mStatus: true,
+          mSlug: true,
+          variant: {
+            where: {
+              mStatus: ProductStatus.IN_STOCK
+            }
+          },
+          origin: {
+            select: {
+              mId: true,
+              mCountry: true,
+              mFlag: true,
+              mSlug: true,
+            }
+          },
+          category: {
+            select: {
+              mId: true,
+              mName: true,
+              mSlug: true,
+            }
+          },
+          manufacturer: {
+            select: {
+              mId: true,
+              mSlug: true,
+              mName: true,
+              mLogo: true
+            }
+          }
+        },
+        orderBy: findProductDto.sort,
+        skip: findProductDto.skip,
+        take: findProductDto.pageSize
+      }),
+      this.prisma.product.count({
+        where
+      })
+    ])
   }
 
   async findOne(id: number) {
