@@ -30,6 +30,17 @@ export class ProductService {
     return updateProduct;
   }
 
+  async findAll(): Promise<any[]> {
+    return this.prisma.product.findMany({
+      include: {
+        category: true,
+        manufacturer: true,
+        origin: true,
+        variant: true
+      }
+    });
+  }
+
   async find(findProductDto: FindProductDto) {
     const where = {
       ...(findProductDto.mName ? {

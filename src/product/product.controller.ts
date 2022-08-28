@@ -27,6 +27,14 @@ export class ProductController {
     return this.productService.create(createProductDto);
   }
 
+  @Get()
+  @ApiOperation({ summary: 'Get all products' })
+  @ApiResponse({ status: 200, description: 'Found products', type: [Product] })
+  @ApiResponse({ status: 404, description: 'Not found' })
+  async findAll() {
+    return await this.productService.findAll();
+  }
+
   @Post('/search')
   @ApiOperation({ summary: 'Search for product' })
   @ApiResponse({ status: 200, description: 'List of products found' })
