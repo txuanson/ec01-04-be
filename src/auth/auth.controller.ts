@@ -8,6 +8,9 @@ import { Token } from '@/auth/types/token.type';
 import { LocalAuthGuard } from './guards/local.guard';
 import { User } from './decorator/get-user.decorator';
 import { UserEntity } from '@/user/entities/user.entity';
+import { AuthRegisterAdminDto } from './dto/auth.register.admin.dto';
+import { UserRole } from './guards/role.guard';
+import { AdminLocalAuthGuard } from './guards/admin-local.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -52,5 +55,23 @@ export class AuthController {
   @HttpCode(204)
   async resetPassword(@Body() dto: AuthResetPasswordDto) {
     return this.authService.resetPasswordByToken(dto);
+  }
+
+  @Post('/register-admin')
+  @ApiOperation({ summary: 'Create admin user' })
+  @ApiResponse({ status: 201, description: 'Admin user created' })
+  async createAdmin(@Body() dto: AuthRegisterAdminDto) {
+    return this.authService.createAdmin(dto);
+  }
+
+  @UseGuards(AdminLocalAuthGuard)
+  @Post('/login-admin')
+  @ApiOperation({ summary: 'Admin login' })
+  @ApiBody({ type: AuthLoginDto })
+  @ApiResponse({ status: 200, description: 'Login success, return access token', type: Token })
+  @ApiBadRequestResponse({ description: 'Unauthorized, user given wrong credentials', type: BadRequestException })
+  @HttpCode(200)
+  async loginAdmin(@User() user: UserEntity): Promise<Token> {
+    return this.authService.signToken(user, UserRole.ADMIN);
   }
 }

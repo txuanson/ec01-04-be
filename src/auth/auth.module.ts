@@ -8,6 +8,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
 import { readFileSync } from 'fs';
+import { AdminStrategy } from './strategies/admin.strategy';
 
 @Module({
   imports: [
@@ -29,7 +30,7 @@ import { readFileSync } from 'fs';
     }),
     ConfigModule
   ],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
+  providers: [AuthService, LocalStrategy, JwtStrategy, AdminStrategy],
   controllers: [AuthController]
 })
 export class AuthModule { }

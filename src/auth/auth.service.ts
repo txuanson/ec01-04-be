@@ -9,6 +9,7 @@ import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/
 import { JwtService } from '@nestjs/jwt';
 import argon2 from 'argon2'
 import { randomBytes } from 'crypto'
+import { AuthRegisterAdminDto } from './dto/auth.register.admin.dto';
 import { UserRole } from './guards/role.guard';
 @Injectable()
 export class AuthService {
@@ -28,6 +29,20 @@ export class AuthService {
     return user;
   }
 
+  async authenticateAdmin(email: string, password: string) {
+    const admin = await this.prisma.admin.findUniqueOrThrow({
+      where: {
+        mEmail: email 
+      },
+    });
+
+    if(!admin || !(await this._verifyPassword(admin.mPassword, password))) {
+      throw new UnauthorizedException(['Email or password were incorrect!']);
+    }
+
+    return admin;
+  }
+
   async signToken(user: UserEntity, role: UserRole = UserRole.USER): Promise<Token> {
     return {
       accessToken: this.jwtService.sign({ sub: user.mId, email: user.mEmail, role })
@@ -42,6 +57,18 @@ export class AuthService {
     dto.mPassword = await this._hashPassword(dto.mPassword);
 
     await this.userService.create(dto, dto.mEmail.split('@')[0])
+  }
+
+  async createAdmin(createAdminDto: AuthRegisterAdminDto): Promise<void> {
+    createAdminDto.mPassword = await this._hashPassword(createAdminDto.mPassword);
+    await this.prisma.admin.create({
+      data: {
+        mEmail: createAdminDto.mEmail,
+        mPassword: createAdminDto.mPassword,
+        mRole: UserRole.ADMIN,
+        mUsername: createAdminDto.mName
+      }
+    })
   }
 
   async forgetPassword(dto: AuthForgotPasswordRequestDto): Promise<void> {
