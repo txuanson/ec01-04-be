@@ -1,15 +1,20 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, UseGuards } from '@nestjs/common';
 import { OriginService } from './origin.service';
 import { CreateOriginDto } from './dto/create-origin.dto';
 import { UpdateOriginDto } from './dto/update-origin.dto';
-import { ApiBadRequestResponse, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOperation, ApiResponse } from '@nestjs/swagger';
 import { Origin } from './entities/origin.entity';
+import { Roles } from '@/auth/decorator/role.decorator';
+import { RolesGuard, UserRole } from '@/auth/guards/role.guard';
 
 @Controller('origin')
 export class OriginController {
   constructor(private readonly originService: OriginService) { }
 
   @Post()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new origin' })
   @ApiResponse({ status: 201, description: 'New origin created', type: Origin })
   @ApiBadRequestResponse({ description: 'Bad request' })
@@ -33,6 +38,9 @@ export class OriginController {
   }
 
   @Patch(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update an origin' })
   @ApiResponse({ status: 200, description: 'Origin updated', type: Origin })
   update(@Param('id') id: string, @Body() updateOriginDto: UpdateOriginDto) {
@@ -40,6 +48,9 @@ export class OriginController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete an origin' })
   @ApiResponse({ status: 200, description: 'Origin deleted', type: Origin })
   remove(@Param('id') id: string) {

@@ -11,8 +11,6 @@ import { UserAddressService } from './user-address.service';
 import { UserService } from './user.service';
 
 @Controller('user')
-@UseGuards(RolesGuard)
-@Roles(UserRole.USER)
 export class UserController {
   constructor(
     private readonly userSerivce: UserService,
@@ -31,6 +29,8 @@ export class UserController {
   }
 
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all users' })
   async findAll(): Promise<UserEntity[]> {
@@ -38,6 +38,8 @@ export class UserController {
   }
 
   @Get('address')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.USER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Get current user addresses' })
   async findUserAddress(@User() user: JwtPayload): Promise<any> {
@@ -45,6 +47,8 @@ export class UserController {
   }
 
   @Patch('address/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.USER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Update current user address' })
   async updateUserAddress(@User() user: JwtPayload, @Param('id') id: string, @Body() updateUserAddressDto: UpdateUserAddressDto): Promise<any> {
@@ -57,6 +61,8 @@ export class UserController {
   }
 
   @Delete('address/:id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.USER)
   @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete current user address' })
   async deleteUserAddress(@User() user: JwtPayload, @Param('id') id: string): Promise<any> {

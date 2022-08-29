@@ -1,15 +1,17 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, HttpCode, UseGuards } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { CreateProductDto } from './dto/create-product.dto';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { FindProductDto } from './dto/find-product.dto';
-import { ApiBadRequestResponse, ApiOperation, ApiResponse, IntersectionType } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiBearerAuth, ApiOperation, ApiResponse, IntersectionType } from '@nestjs/swagger';
 import { Product } from './entities/product.entity';
 import { ProductVariant } from './entities/product-variant.entity';
 import { CreateProductVariantDto } from './dto/create-product-variant.dto';
 import { ProductVariantService } from './product-variant.service';
 import { UpdateProductVariantDto } from './dto/update-product-variant.dto';
 import { CategoryService } from 'src/category/category.service';
+import { Roles } from '@/auth/decorator/role.decorator';
+import { RolesGuard, UserRole } from '@/auth/guards/role.guard';
 
 @Controller('product')
 export class ProductController {
@@ -20,6 +22,9 @@ export class ProductController {
   ) { }
 
   @Post()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new product' })
   @ApiResponse({ status: 201, description: 'New product created', type: Product })
   @ApiBadRequestResponse({ description: 'Bad request' })
@@ -28,6 +33,9 @@ export class ProductController {
   }
 
   @Get()
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get all products' })
   @ApiResponse({ status: 200, description: 'Found products', type: [Product] })
   @ApiResponse({ status: 404, description: 'Not found' })
@@ -63,7 +71,10 @@ export class ProductController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Delete product' })
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @ApiOperation({ summary: 'Update product' })
   @ApiResponse({ status: 200, description: 'Product updated', type: Product })
   @ApiBadRequestResponse({ description: 'Bad request' })
   update(@Param('id') id: string, @Body() updateProductDto: UpdateProductDto) {
@@ -71,6 +82,9 @@ export class ProductController {
   }
 
   @Delete(':id')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete product' })
   @ApiResponse({ status: 200, description: 'Product deleted', type: Product })
   @ApiBadRequestResponse({ description: 'Bad request' })
@@ -79,6 +93,9 @@ export class ProductController {
   }
 
   @Post('/:id/variant')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Create new variant for product' })
   @ApiResponse({ status: 201, description: 'Variant created', type: ProductVariant })
   @ApiBadRequestResponse({ description: 'Bad request' })
@@ -94,6 +111,9 @@ export class ProductController {
   }
 
   @Get('/:id/variant/:sku')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Get variant info' })
   @ApiResponse({ status: 200, description: 'Variant info', type: ProductVariant })
   async findVariantBySku(@Param('id') productId: string, @Param('sku') sku: string) {
@@ -101,6 +121,9 @@ export class ProductController {
   }
 
   @Patch('/:id/variant/:sku')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Update variant info' })
   @ApiResponse({ status: 200, description: 'Product variant info updated', type: ProductVariant })
   @ApiBadRequestResponse({ description: 'Bad request' })
@@ -109,6 +132,9 @@ export class ProductController {
   }
 
   @Delete('/:id/variant/:sku')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
   @ApiOperation({ summary: 'Delete variant' })
   @ApiResponse({ status: 200, description: 'Product variant deleted' })
   deleteVariant(@Param('id') productId: string, @Param('sku') sku: string) {
