@@ -41,7 +41,13 @@ export class ProductService {
         category: true,
         manufacturer: true,
         origin: true,
-        variant: true
+        variant: {
+          where: {
+            mStatus: {
+              not: ProductStatus.DELETED
+            }
+          }
+        }
       },
       orderBy: {
         mModifiedAt: 'desc'
