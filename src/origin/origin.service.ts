@@ -29,7 +29,11 @@ export class OriginService {
   }
 
   async findAll() {
-    return await this.prisma.origin.findMany();
+    return await this.prisma.origin.findMany({
+      orderBy: {
+        mModifiedAt: 'desc'
+      }
+    });
   }
 
   async findOne(id: number) {

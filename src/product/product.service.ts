@@ -42,6 +42,9 @@ export class ProductService {
         manufacturer: true,
         origin: true,
         variant: true
+      },
+      orderBy: {
+        mModifiedAt: 'desc'
       }
     });
   }
