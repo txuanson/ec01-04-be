@@ -19,6 +19,17 @@ export class ProductVariantService {
     })
   }
 
+  async findVariantBySku(productId: number, sku: string) {
+    return this.prisma.productVariant.findUniqueOrThrow({
+      where: {
+        mProductId_mSku: {
+          mProductId: productId,
+          mSku: sku
+        }
+      }
+    })
+  }
+
   async findAllVariantOfProduct(productId: number) {
     return await this.prisma.productVariant.findMany({
       where: {

@@ -93,6 +93,13 @@ export class ProductController {
     return this.productVariantService.findAllVariantOfProduct(+productId)
   }
 
+  @Get('/:id/variant/:sku')
+  @ApiOperation({ summary: 'Get variant info' })
+  @ApiResponse({ status: 200, description: 'Variant info', type: ProductVariant })
+  async findVariantBySku(@Param('id') productId: string, @Param('sku') sku: string) {
+    return await this.productVariantService.findVariantBySku(+productId, sku);
+  }
+
   @Patch('/:id/variant/:sku')
   @ApiOperation({ summary: 'Update variant info' })
   @ApiResponse({ status: 200, description: 'Product variant info updated', type: ProductVariant })
